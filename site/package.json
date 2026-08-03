@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
-    "check": "tsc --noEmit",
+    "check": "astro sync && tsc --noEmit",
     "preview": "astro preview",
     "test": "vitest run",
     "test:watch": "vitest",
