@@ -1,0 +1,92 @@
+---
+---
+<script is:inline>
+	(() => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+
+		const existing = window.__jaxTheme;
+		if (existing) {
+			existing.apply?.(existing.getPreference?.() ?? 'auto', false);
+			return;
+		}
+
+		const storageKey = 'starlight-theme';
+		const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+
+		const parsePreference = (value) =>
+			value === 'light' || value === 'dark' || value === 'auto' ? value : 'auto';
+
+		const resolveTheme = (preference) =>
+			preference === 'auto' ? (mediaQuery.matches ? 'light' : 'dark') : preference;
+
+		const loadPreference = () => {
+			try {
+				const stored = localStorage.getItem(storageKey);
+				return parsePreference(stored === '' || stored === null ? 'auto' : stored);
+			} catch {
+				return 'auto';
+			}
+		};
+
+		const storePreference = (preference) => {
+			try {
+				if (preference === 'auto') {
+					localStorage.removeItem(storageKey);
+					return;
+				}
+				localStorage.setItem(storageKey, preference);
+			} catch {
+				// Ignore storage errors in private browsing modes.
+			}
+		};
+
+		const emitChange = (preference, theme) => {
+			window.dispatchEvent(
+				new CustomEvent('starlight-theme-change', {
+					detail: { preference, theme },
+				}),
+			);
+		};
+
+		let preference = loadPreference();
+
+		const apply = (nextPreference, emit = true) => {
+			const nextTheme = resolveTheme(nextPreference);
+			document.documentElement.dataset.theme = nextTheme;
+			document.documentElement.style.colorScheme = nextTheme;
+			if (emit) {
+				emitChange(nextPreference, nextTheme);
+			}
+			return nextTheme;
+		};
+
+		const setPreference = (nextPreference) => {
+			preference = parsePreference(nextPreference);
+			storePreference(preference);
+			return apply(preference, true);
+		};
+
+		const onSystemThemeChange = () => {
+			if (preference === 'auto') {
+				apply(preference, true);
+			}
+		};
+
+		if (typeof mediaQuery.addEventListener === 'function') {
+			mediaQuery.addEventListener('change', onSystemThemeChange);
+		} else {
+			mediaQuery.addListener(onSystemThemeChange);
+		}
+
+		window.__jaxTheme = {
+			apply,
+			getPreference: () => preference,
+			getTheme: () => resolveTheme(preference),
+			setPreference,
+		};
+
+		apply(preference, false);
+	})();
+</script>

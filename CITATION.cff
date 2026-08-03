@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: jax-evogym
+message: "If you use jax-evogym in research, please cite this software."
+type: software
+license: Apache-2.0
+version: 0.1.0
+date-released: 2026-08-02
+authors:
+  - name: jax-evogym contributors
+repository-code: "https://github.com/btgaskin/jax-evogym"
+url: "https://jax-evogym.pages.dev"
+abstract: "A JAX-native EvoGym core library for soft-body robot simulation, world construction, rendering, and parity validation."
+references:
+  - type: conference-paper
+    title: "Evolution Gym: A Large-Scale Benchmark for Evolving Soft Robots"
+    year: 2021
+    collection-title: "Advances in Neural Information Processing Systems (NeurIPS)"
+    notes: "Original Evolution Gym benchmark (MIT License); jax-evogym is a JAX reimplementation."
+    authors:
+      - family-names: Bhatia
+        given-names: Jagdeep
+      - family-names: Jackson
+        given-names: Holly
+      - family-names: Tian
+        given-names: Yunsheng
+      - family-names: Xu
+        given-names: Jie
+      - family-names: Matusik
+        given-names: Wojciech

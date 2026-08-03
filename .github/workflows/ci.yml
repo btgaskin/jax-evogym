@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python-core:
+    name: Python Core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Run deterministic core tests
+        run: uv run --extra dev pytest -q tests
+
+      - name: Build package artifacts
+        run: uv build --wheel --sdist
+
+      - name: Check package artifact boundaries
+        run: |
+          python - <<'PY'
+          import tarfile
+          import zipfile
+          from pathlib import Path
+
+          forbidden = (
+              "experiments/",
+              "paper_data",
+              "node_modules/",
+              "outputs/",
+              "checkpoints/",
+              "paper_specimens",
+              "terrain_suites/",
+              "src/jax_evogym/data/ramp",
+          )
+
+          wheel = next(Path("dist").glob("*.whl"))
+          sdist = next(Path("dist").glob("*.tar.gz"))
+
+          with zipfile.ZipFile(wheel) as zf:
+              wheel_names = zf.namelist()
+          with tarfile.open(sdist) as tf:
+              sdist_names = tf.getnames()
+
+          bad = [
+              name
+              for name in [*wheel_names, *sdist_names]
+              if any(marker in name for marker in forbidden)
+          ]
+          if bad:
+              print("Forbidden package entries:")
+              print("\n".join(bad[:200]))
+              raise SystemExit(1)
+          PY
+
+  docs-site:
+    name: Docs Site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.6"
+
+      - name: Install site dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run site tests
+        run: bun test
+
+      - name: Type-check docs site
+        run: bunx tsc --noEmit
+
+      - name: Build docs site
+        run: bun run build

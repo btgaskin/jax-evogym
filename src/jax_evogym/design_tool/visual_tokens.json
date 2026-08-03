@@ -1,0 +1,147 @@
+{
+  "ui": {
+    "app_bg": "#F3F1EC",
+    "panel_bg": "#FBFAF7",
+    "canvas_bg": "#F7F6F2",
+    "border": "#D7D3CA",
+    "text_primary": "#1B1F24",
+    "text_secondary": "#5D6773",
+    "accent": "#0E6177",
+    "danger": "#B4493D",
+    "success": "#58753C"
+  },
+  "render": {
+    "grid_minor": "#E8E4DC",
+    "grid_major": "#CBC5B9",
+    "edge": "#214B63",
+    "selection": "#0E6177",
+    "locked": "#8E8D86",
+    "grid_major_every": 5,
+    "edge_width_px": 2
+  },
+  "voxels": {
+    "rigid": {
+      "kind": "solid",
+      "hex": "#2C3138"
+    },
+    "soft": {
+      "kind": "solid",
+      "hex": "#C5CBC4"
+    },
+    "fixed": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_up_right": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_up_left": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_down_right": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_down_left": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_right_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_left_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_right_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_left_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "h_act": {
+      "kind": "gradient",
+      "start": "#F0E2BF",
+      "end": "#B85C1E"
+    },
+    "v_act": {
+      "kind": "gradient",
+      "start": "#C7DDF0",
+      "end": "#1E5F89"
+    },
+    "contractile": {
+      "kind": "gradient",
+      "start": "#D5E0BF",
+      "end": "#5C7A2B"
+    }
+  }
+}

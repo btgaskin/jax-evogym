@@ -1,0 +1,8 @@
+---
+import DesignerApp from '../components/designer/App';
+import DesignerLayout from '../layouts/DesignerLayout.astro';
+---
+
+<DesignerLayout title="Designer" description="Pixel-crisp browser designer for EvoGym worlds.">
+	<DesignerApp client:only="react" />
+</DesignerLayout>

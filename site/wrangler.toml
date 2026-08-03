@@ -1,0 +1,5 @@
+# Cloudflare Pages project config for the jax-evogym docs site.
+# Build the static site first (`bun run build`), then deploy:
+#   wrangler pages deploy dist --project-name jax-evogym
+name = "jax-evogym"
+pages_build_output_dir = "./dist"

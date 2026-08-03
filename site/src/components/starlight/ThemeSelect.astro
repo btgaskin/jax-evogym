@@ -1,0 +1,52 @@
+---
+import { createThemeSelectId } from '../theme/selectId';
+
+const t = Astro.locals.t;
+const selectId = createThemeSelectId('starlight-theme-preference-select');
+---
+
+<starlight-theme-select class="theme-inline-select">
+	<label class="sr-only" for={selectId}>{t('themeSelect.accessibleLabel')}</label>
+	<select id={selectId} aria-label={t('themeSelect.accessibleLabel')}>
+		<option value="auto">{t('themeSelect.auto')}</option>
+		<option value="light">{t('themeSelect.light')}</option>
+		<option value="dark">{t('themeSelect.dark')}</option>
+	</select>
+</starlight-theme-select>
+
+<script>
+	if (!customElements.get('starlight-theme-select')) {
+		class StarlightThemeSelect extends HTMLElement {
+			select: HTMLSelectElement | null = null;
+			sync: () => void = () => {};
+			onChange: (event: Event) => void = () => {};
+			connectedCallback() {
+				this.select = this.querySelector('select');
+				this.sync = () => {
+					const preference = window.__jaxTheme?.getPreference?.() ?? 'auto';
+					if (this.select) {
+						this.select.value = preference;
+					}
+				};
+
+				this.onChange = (event) => {
+					if (!(event.currentTarget instanceof HTMLSelectElement)) {
+						return;
+					}
+					window.__jaxTheme?.setPreference?.(event.currentTarget.value);
+				};
+
+				this.sync();
+				this.select?.addEventListener('change', this.onChange);
+				window.addEventListener('starlight-theme-change', this.sync);
+			}
+
+			disconnectedCallback() {
+				this.select?.removeEventListener('change', this.onChange);
+				window.removeEventListener('starlight-theme-change', this.sync);
+			}
+		}
+
+		customElements.define('starlight-theme-select', StarlightThemeSelect);
+	}
+</script>

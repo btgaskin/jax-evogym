@@ -1,0 +1,60 @@
+---
+import { createThemeSelectId } from './selectId';
+
+interface Props {
+	class?: string;
+	label?: string;
+}
+
+const {
+	class: className = '',
+	label = 'Theme',
+} = Astro.props;
+const selectId = createThemeSelectId('theme-preference-select');
+---
+
+<theme-inline-select class:list={['theme-inline-select', className]}>
+	<label class="sr-only" for={selectId}>{label}</label>
+	<select id={selectId} aria-label={label}>
+		<option value="auto">Auto</option>
+		<option value="light">Light</option>
+		<option value="dark">Dark</option>
+	</select>
+</theme-inline-select>
+
+<script>
+	if (!customElements.get('theme-inline-select')) {
+		class ThemeInlineSelect extends HTMLElement {
+			select: HTMLSelectElement | null = null;
+			sync: () => void = () => {};
+			onChange: (event: Event) => void = () => {};
+			connectedCallback() {
+				this.select = this.querySelector('select');
+				this.sync = () => {
+					const preference = window.__jaxTheme?.getPreference?.() ?? 'auto';
+					if (this.select) {
+						this.select.value = preference;
+					}
+				};
+
+				this.onChange = (event) => {
+					if (!(event.currentTarget instanceof HTMLSelectElement)) {
+						return;
+					}
+					window.__jaxTheme?.setPreference?.(event.currentTarget.value);
+				};
+
+				this.sync();
+				this.select?.addEventListener('change', this.onChange);
+				window.addEventListener('starlight-theme-change', this.sync);
+			}
+
+			disconnectedCallback() {
+				this.select?.removeEventListener('change', this.onChange);
+				window.removeEventListener('starlight-theme-change', this.sync);
+			}
+		}
+
+		customElements.define('theme-inline-select', ThemeInlineSelect);
+	}
+</script>

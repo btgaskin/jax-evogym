@@ -1,0 +1,32 @@
+name: Feature Request
+description: Propose a new stable feature, experiment boundary, or docs improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should this enable for researchers or library users?
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - Stable core API
+        - Experimental/compatibility path
+        - Documentation
+        - Designer/site
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Approach
+  - type: textarea
+    id: validation
+    attributes:
+      label: Suggested Validation
+      description: Tests, parity checks, or benchmarks that should gate this.

@@ -1,0 +1,185 @@
+{
+  "metrics": {
+    "grid_major_every": 5,
+    "edge_width_px": 2
+  },
+  "themes": {
+    "light": {
+      "ui": {
+        "app_bg": "#F2F5F2",
+        "panel_bg": "#F7FAF7",
+        "canvas_bg": "#EDF2EE",
+        "surface": "#FFFFFF",
+        "surface_elevated": "#FFFFFF",
+        "border": "#CCD6CF",
+        "text_primary": "#151C18",
+        "text_secondary": "#4F6056",
+        "accent": "#2F7D55",
+        "danger": "#B4493D",
+        "success": "#2F7D55"
+      },
+      "render": {
+        "grid_minor": "#DFE5DF",
+        "grid_major": "#C1CBC2",
+        "edge": "#3F6751",
+        "selection": "#2F7D55",
+        "locked": "#8B958D",
+        "marker_spawn": "#2F7D55",
+        "marker_target": "#B36B2A",
+        "marker_direction": "#4A5B50",
+        "marker_fill": "#FFFFFF"
+      }
+    },
+    "dark": {
+      "ui": {
+        "app_bg": "#0F1311",
+        "panel_bg": "#141A17",
+        "canvas_bg": "#111814",
+        "surface": "#1A221E",
+        "surface_elevated": "#1F2924",
+        "border": "#2A3530",
+        "text_primary": "#E6EDE8",
+        "text_secondary": "#A8B4AC",
+        "accent": "#6ECB92",
+        "danger": "#E07A74",
+        "success": "#6ECB92"
+      },
+      "render": {
+        "grid_minor": "#233028",
+        "grid_major": "#334238",
+        "edge": "#8FB9A1",
+        "selection": "#74D39A",
+        "locked": "#617067",
+        "marker_spawn": "#74D39A",
+        "marker_target": "#F0AA6B",
+        "marker_direction": "#BDCAC2",
+        "marker_fill": "#111814"
+      }
+    }
+  },
+  "voxels": {
+    "rigid": {
+      "kind": "solid",
+      "hex": "#2C3138"
+    },
+    "soft": {
+      "kind": "solid",
+      "hex": "#C5CBC4"
+    },
+    "fixed": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_up_right": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_up_left": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_down_right": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope_down_left": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_up_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope2_down_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_right_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_left_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_up_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_right_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_right_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_right_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_left_light": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_left_mid": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "slope3_down_left_heavy": {
+      "kind": "solid",
+      "hex": "#535B64"
+    },
+    "h_act": {
+      "kind": "gradient",
+      "start": "#F0E2BF",
+      "end": "#B85C1E"
+    },
+    "v_act": {
+      "kind": "gradient",
+      "start": "#C7DDF0",
+      "end": "#1E5F89"
+    },
+    "contractile": {
+      "kind": "gradient",
+      "start": "#D5E0BF",
+      "end": "#5C7A2B"
+    }
+  }
+}

@@ -1,0 +1,170 @@
+---
+import '../styles/site.css';
+import ThemeBoot from '../components/theme/ThemeBoot.astro';
+import ThemeSelectInline from '../components/theme/ThemeSelectInline.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="description" content="A JAX-native EvoGym simulator with JIT-compiled, vmap-batched soft-body rollouts and parity validated against original-simulator reference traces on the documented task set." />
+		<link rel="icon" href={`${base}/favicon.svg`} />
+		<title>JAX EvoGym</title>
+		<ThemeBoot />
+	</head>
+	<body class="bg-app font-sans text-ink antialiased">
+		<div class="min-h-[100dvh]">
+			<header class="sticky top-0 z-30 border-b border-border/80 bg-panel/95 backdrop-blur-sm">
+				<div class="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3 md:px-6">
+					<a href={`${base}/`} class="flex items-center gap-3 no-underline">
+						<span class="flex size-11 items-center justify-center rounded-2xl bg-accent font-mono text-sm font-semibold text-on-accent">
+							JX
+						</span>
+						<span class="min-w-0">
+							<span class="block text-sm font-semibold text-balance text-ink">JAX EvoGym</span>
+							<span class="block text-sm text-muted text-pretty">Docs + browser designer</span>
+						</span>
+					</a>
+					<nav aria-label="Primary" class="flex flex-wrap items-center gap-2 text-sm">
+						<a href={`${base}/getting-started/installation/`} class="rounded-full px-3 py-2 text-ink transition hover:bg-canvas">
+							Docs
+						</a>
+						<a href={`${base}/designer/`} class="rounded-full px-3 py-2 text-ink transition hover:bg-canvas">
+							Designer
+						</a>
+						<ThemeSelectInline />
+						<a
+							href="https://github.com/btgaskin/jax-evogym"
+							target="_blank"
+							rel="noreferrer"
+							class="rounded-full border border-border bg-surface px-3 py-2 text-ink transition hover:border-accent hover:text-accent"
+						>
+							GitHub
+						</a>
+					</nav>
+				</div>
+			</header>
+
+			<main class="mx-auto max-w-[1600px] px-4 md:px-6">
+				<!-- Hero: asymmetric split -->
+				<section class="grid min-h-[min(70vh,640px)] grid-cols-1 items-center gap-12 py-16 md:grid-cols-[3fr_2fr] md:gap-16 md:py-24">
+					<div>
+						<h1 class="text-4xl font-semibold tracking-tighter text-ink md:text-6xl">JAX EvoGym</h1>
+						<p class="mt-4 max-w-[50ch] text-lg leading-relaxed text-muted md:text-xl">
+								A JAX-native soft-body simulator with JIT-compiled, massively parallel rollouts and parity validated against original-simulator reference traces on the documented EvoGym task set.
+						</p>
+						<div class="mt-8 flex flex-wrap gap-3">
+							<a
+								href={`${base}/designer/`}
+								class="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-on-accent transition hover:opacity-90 active:translate-y-px"
+							>
+								Open Designer
+								<svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+									<path d="M3 8h10m-4-4 4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</a>
+							<a
+								href={`${base}/getting-started/quickstart/`}
+								class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-ink transition hover:border-accent hover:text-accent active:translate-y-px"
+							>
+								Read the Docs
+							</a>
+						</div>
+					</div>
+
+					<!-- Voxel creature SVG illustration -->
+					<div class="flex items-center justify-center" aria-hidden="true">
+						<svg viewBox="0 0 224 224" width="280" height="280" class="max-w-full">
+							<!-- Grid background hints -->
+							<defs>
+								<pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+									<path d="M 28 0 L 0 0 0 28" fill="none" stroke="#E8E4DC" stroke-width="0.5" />
+								</pattern>
+							</defs>
+							<rect width="224" height="224" fill="url(#grid)" rx="16" />
+
+							<!-- Body (rigid) -->
+							<rect x="70" y="56" width="28" height="28" fill="#2C3138" rx="2" />
+							<rect x="98" y="56" width="28" height="28" fill="#2C3138" rx="2" />
+							<rect x="126" y="56" width="28" height="28" fill="#2C3138" rx="2" />
+							<rect x="70" y="84" width="28" height="28" fill="#2C3138" rx="2" />
+							<rect x="126" y="84" width="28" height="28" fill="#2C3138" rx="2" />
+
+							<!-- Core (soft) -->
+							<rect x="98" y="84" width="28" height="28" fill="#C5CBC4" rx="2" />
+
+							<!-- Horizontal actuators (legs) -->
+							<defs>
+								<linearGradient id="hact" x1="0" y1="0" x2="0" y2="1">
+									<stop offset="0%" stop-color="#F0E2BF" />
+									<stop offset="100%" stop-color="#B85C1E" />
+								</linearGradient>
+								<linearGradient id="vact" x1="0" y1="0" x2="0" y2="1">
+									<stop offset="0%" stop-color="#C7DDF0" />
+									<stop offset="100%" stop-color="#1E5F89" />
+								</linearGradient>
+								<linearGradient id="cont" x1="0" y1="0" x2="0" y2="1">
+									<stop offset="0%" stop-color="#D5E0BF" />
+									<stop offset="100%" stop-color="#5C7A2B" />
+								</linearGradient>
+							</defs>
+
+							<!-- Vertical actuators (arms) -->
+							<rect x="98" y="28" width="28" height="28" fill="url(#vact)" rx="2" />
+							<rect x="98" y="112" width="28" height="28" fill="url(#vact)" rx="2" />
+
+							<!-- H-Act legs -->
+							<rect x="70" y="112" width="28" height="28" fill="url(#hact)" rx="2" />
+							<rect x="126" y="112" width="28" height="28" fill="url(#hact)" rx="2" />
+
+							<!-- Contractile feet -->
+							<rect x="70" y="140" width="28" height="28" fill="url(#cont)" rx="2" />
+							<rect x="126" y="140" width="28" height="28" fill="url(#cont)" rx="2" />
+
+							<!-- Slope terrain ramp -->
+							<polygon points="14,196 42,168 42,196" fill="#535B64" />
+							<rect x="42" y="168" width="28" height="28" fill="#535B64" rx="0" />
+							<rect x="70" y="168" width="28" height="28" fill="#535B64" rx="0" />
+							<rect x="98" y="168" width="28" height="28" fill="#535B64" rx="0" />
+							<rect x="126" y="168" width="28" height="28" fill="#535B64" rx="0" />
+							<rect x="154" y="168" width="28" height="28" fill="#535B64" rx="0" />
+							<polygon points="182,168 182,196 210,196" fill="#535B64" />
+						</svg>
+					</div>
+				</section>
+
+				<!-- Features: border-t dividers, not cards -->
+				<section class="grid grid-cols-1 gap-0 border-t border-border/60 pb-20 md:grid-cols-2">
+					<div class="border-b border-border/40 py-8 pr-8 md:border-b-0 md:border-r md:border-border/40 md:py-10 md:pr-12">
+						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Designer</h3>
+						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
+							A browser-based voxel editor for building EvoGym worlds. Import, validate, and export canonical JSON. Keyboard-driven with modeless context-dependent interactions.
+						</p>
+					</div>
+					<div class="border-b border-border/40 py-8 md:border-b-0 md:py-10 md:pl-12">
+						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Core Runtime</h3>
+						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
+								Object-separated JAX simulation with JIT-compiled physics and vmap-batched rollouts. Architecture docs cover compilation, collision, deformation, and the render model.
+						</p>
+					</div>
+					<div class="border-b border-border/40 py-8 pr-8 md:border-b-0 md:border-r md:border-border/40 md:py-10 md:pr-12">
+						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Canonical JSON</h3>
+						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
+							Designer import and export stay aligned with the EvoGym world format. Indices, types, and neighbor adjacency match <code class="rounded bg-canvas px-1.5 py-0.5 font-mono text-xs">EvoWorld.to_json_dict()</code> exactly.
+						</p>
+					</div>
+					<div class="py-8 md:py-10 md:pl-12">
+						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Static Deployment</h3>
+						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
+							The docs site and designer are pure frontend assets. Build once with Astro and host anywhere that serves static files.
+						</p>
+					</div>
+				</section>
+			</main>
+		</div>
+	</body>
+</html>

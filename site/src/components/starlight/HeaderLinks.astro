@@ -1,0 +1,43 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<div class="header-links">
+	<a href={`${base}/`} class="header-link">Docs</a>
+	<a href={`${base}/designer/`} class="header-link">Designer</a>
+	<a
+		href="https://github.com/btgaskin/jax-evogym"
+		target="_blank"
+		rel="noreferrer"
+		class="header-link header-link-accent"
+	>
+		GitHub
+	</a>
+</div>
+
+<style>
+	@layer starlight.core {
+		.header-links {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			font-size: 0.95rem;
+		}
+
+		.header-link {
+			color: var(--sl-color-text);
+			text-decoration: none;
+			padding: 0.375rem 0.625rem;
+			border-radius: 999px;
+		}
+
+		.header-link:hover {
+			color: var(--sl-color-text-accent);
+			background: color-mix(in srgb, var(--sl-color-accent) 10%, transparent);
+		}
+
+		.header-link-accent {
+			border: 1px solid color-mix(in srgb, var(--sl-color-accent) 18%, transparent);
+		}
+	}
+</style>
