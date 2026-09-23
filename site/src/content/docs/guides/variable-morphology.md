@@ -51,8 +51,8 @@ from jax_evogym import compile_world_templates
 
 template_set = compile_world_templates(world, robot_name="robot", mirror_mode="paired")
 
-built_primary = instantiate_world(template_set.primary, robot_override=body)
-built_mirror = instantiate_world(template_set.mirror, robot_override=body)
+built_primary = instantiate_world(template_set.primary, robot_override=dense)
+built_mirror = instantiate_world(template_set.mirror, robot_override=dense)
 ```
 
 If you want a truly mirrored body, construct the mirrored array yourself.
@@ -62,14 +62,17 @@ If you want a truly mirrored body, construct the mirrored array yourself.
 For evolutionary search where you need to evaluate thousands of morphologies in parallel, the dense grid pipeline provides pure JAX, vmap-able construction:
 
 ```python
+import jax.numpy as jnp
+from jax_evogym import EMPTY, H_ACT, SOFT, V_ACT
 from jax_evogym import precompute_grid, jax_build_sim_state, jax_build_collision_data
 
-# 1. Precompute grid infrastructure (once per grid size)
-grid_data = precompute_grid(H=5, W=5)
+# Dense grids use y-up rows. This example contains only a robot.
+body_array = jnp.array([[H_ACT, SOFT, V_ACT]], dtype=jnp.int32)
+grid_data = precompute_grid(H=1, W=3)
+robot_mask = body_array != EMPTY
 
-# 2. Build simulation data (pure JAX, vmap-able)
-sim_state = jax_build_sim_state(body_array, grid_data)
-collision_data = jax_build_collision_data(body_array, grid_data)
+sim_state, topology = jax_build_sim_state(body_array, grid_data)
+collision_data = jax_build_collision_data(body_array, robot_mask, grid_data)
 ```
 
 See [Dense Grid Pipeline](../../guides/dense-grid/) for the full guide.

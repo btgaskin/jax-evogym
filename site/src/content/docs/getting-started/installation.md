@@ -7,8 +7,14 @@ description: Install jax-evogym and its optional dependencies.
 
 `jax-evogym` is not yet published on PyPI. Install it from a source checkout.
 
+Requires Python 3.11 or later. Clone the repository, then install from its root:
+
 ```bash
-pip install .
+git clone https://github.com/btgaskin/jax-evogym.git
+cd jax-evogym
+python -m venv .venv
+source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install .
 ```
 
 With visualization support (includes Pillow):

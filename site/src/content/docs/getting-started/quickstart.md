@@ -14,7 +14,7 @@ world.add_from_array("robot", np.array([[H_ACT, SOFT, V_ACT]]), 0, 0)
 world.to_json("robot.json")
 ```
 
-`EvoWorld` is a numpy-only world definition. No JAX required at this stage.
+`EvoWorld` stores the world definition in NumPy. This example does not run a simulation; the package installation still includes JAX.
 
 ## Run an environment
 

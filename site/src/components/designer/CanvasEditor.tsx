@@ -175,7 +175,7 @@ export default function CanvasEditor({
 			return null;
 		}
 
-		setCursor(grid);
+		setCursor((current) => current?.x === grid.x && current?.y === grid.y ? current : grid);
 		return grid;
 	};
 
@@ -479,7 +479,7 @@ export default function CanvasEditor({
 								Build robots and terrain from voxels, then export world JSON for the jax-evogym simulator.
 							</p>
 							<p className="mt-2 max-w-xl text-xs text-muted">
-								Pick a voxel type from the palette above, then click or drag on the grid. Press{' '}
+								Pick a voxel type from the palette above, then click a grid cell. Hold Space while dragging to paint a stroke. Press{' '}
 								<kbd className="rounded border border-border/60 bg-surface px-1 py-0.5 font-mono text-[11px]">?</kbd> for keyboard shortcuts.
 							</p>
 						</div>

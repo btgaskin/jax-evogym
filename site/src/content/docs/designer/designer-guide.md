@@ -15,6 +15,8 @@ The interface has three regions:
 - **Canvas** — the main drawing area.
 - **Right sidebar** — stacked panels: Document, Metadata, Objects, Validation.
 
+On narrow screens, open **Controls** to access these panels. Close the drawer after selecting **Place on canvas**, then place the marker on the grid.
+
 The palette bar sits above the canvas and shows the two stable voxel groups plus object action buttons when an object is selected.
 
 ---
@@ -127,7 +129,7 @@ Deletes the selected object immediately (no confirmation when using the keyboard
 
 ### Pan
 
-Drag on empty canvas space (where there are no voxels) to pan the view. You can also drag with the middle mouse button from any canvas position. The cursor changes to a grab cursor while panning.
+Drag outside the world grid to pan the view. You can also drag with the middle mouse button from any canvas position. Clicking an empty cell inside the grid paints a voxel. The cursor changes to a grab cursor while panning.
 
 ### Zoom
 
@@ -250,7 +252,7 @@ still experimental; stable worlds should use square-cell terrain.
 | Paint stroke | `Space` + Drag |
 | Erase voxel | `X` / Right-click |
 | Rectangle fill | `Shift` + Drag |
-| Pan viewport | Drag empty space |
+| Pan viewport | Drag outside grid / Middle-drag |
 | Zoom | Scroll |
 | Rotate object | `R` |
 | Mirror object | `Ctrl+M` |

@@ -20,13 +20,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 		<div class="min-h-[100dvh]">
 			<header class="sticky top-0 z-30 border-b border-border/80 bg-panel/95 backdrop-blur-sm">
 				<div class="mx-auto flex max-w-[1180px] items-center justify-between gap-4 px-4 py-3 md:px-6">
-					<a href={`${base}/`} class="flex items-center gap-3 no-underline">
-						<span class="flex size-11 items-center justify-center rounded-2xl bg-accent font-mono text-sm font-semibold text-on-accent">
+					<a href={`${base}/`} class="flex shrink-0 items-center gap-3 no-underline">
+						<span class="hidden size-11 items-center sm:flex justify-center rounded-2xl bg-accent font-mono text-sm font-semibold text-on-accent">
 							JX
 						</span>
 						<span class="min-w-0">
 							<span class="block text-sm font-semibold text-balance text-ink">JAX EvoGym</span>
-							<span class="block text-sm text-muted text-pretty">Docs + browser designer</span>
+							<span class="hidden text-sm text-muted text-pretty sm:block">Docs + browser designer</span>
 						</span>
 					</a>
 					<nav aria-label="Primary" class="flex flex-wrap items-center gap-2 text-sm">
@@ -55,7 +55,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 					<div>
 						<h1 class="text-4xl font-semibold tracking-tighter text-ink md:text-6xl">JAX EvoGym</h1>
 						<p class="mt-4 max-w-[50ch] text-lg leading-relaxed text-muted md:text-xl">
-								A JAX-native soft-body simulator with JIT-compiled, massively parallel rollouts and parity validated against original-simulator reference traces on the documented EvoGym task set.
+								Design voxel robots and simulate them in JAX. Run batched rollouts, build custom worlds, and render results.
 						</p>
 						<div class="mt-8 flex flex-wrap gap-3">
 							<a
@@ -125,14 +125,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 							<rect x="70" y="140" width="28" height="28" fill="url(#cont)" rx="2" />
 							<rect x="126" y="140" width="28" height="28" fill="url(#cont)" rx="2" />
 
-							<!-- Slope terrain ramp -->
-							<polygon points="14,196 42,168 42,196" fill="#535B64" />
+							<!-- Supported square-cell terrain -->
+							<rect x="14" y="168" width="28" height="28" fill="#535B64" />
 							<rect x="42" y="168" width="28" height="28" fill="#535B64" rx="0" />
 							<rect x="70" y="168" width="28" height="28" fill="#535B64" rx="0" />
 							<rect x="98" y="168" width="28" height="28" fill="#535B64" rx="0" />
 							<rect x="126" y="168" width="28" height="28" fill="#535B64" rx="0" />
 							<rect x="154" y="168" width="28" height="28" fill="#535B64" rx="0" />
-							<polygon points="182,168 182,196 210,196" fill="#535B64" />
+							<rect x="182" y="168" width="28" height="28" fill="#535B64" />
 						</svg>
 					</div>
 				</section>
@@ -140,25 +140,25 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 				<!-- Features: border-t dividers, not cards -->
 				<section class="grid grid-cols-1 gap-0 border-t border-border/60 pb-20 md:grid-cols-2">
 					<div class="border-b border-border/40 py-8 pr-8 md:border-b-0 md:border-r md:border-border/40 md:py-10 md:pr-12">
-						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Designer</h3>
+						<h2 class="text-sm font-semibold uppercase tracking-wide text-accent">Designer</h2>
 						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
-							A browser-based voxel editor for building EvoGym worlds. Import, validate, and export canonical JSON. Keyboard-driven with modeless context-dependent interactions.
+							A browser-based voxel editor for building EvoGym worlds. Import, validate, and export canonical JSON. Choose materials from the palette, with keyboard shortcuts for frequent actions.
 						</p>
 					</div>
 					<div class="border-b border-border/40 py-8 md:border-b-0 md:py-10 md:pl-12">
-						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Core Runtime</h3>
+						<h2 class="text-sm font-semibold uppercase tracking-wide text-accent">Core Runtime</h2>
 						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
 								Object-separated JAX simulation with JIT-compiled physics and vmap-batched rollouts. Architecture docs cover compilation, collision, deformation, and the render model.
 						</p>
 					</div>
 					<div class="border-b border-border/40 py-8 pr-8 md:border-b-0 md:border-r md:border-border/40 md:py-10 md:pr-12">
-						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Canonical JSON</h3>
+						<h2 class="text-sm font-semibold uppercase tracking-wide text-accent">Canonical JSON</h2>
 						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
 							Designer import and export stay aligned with the EvoGym world format. Indices, types, and neighbor adjacency match <code class="rounded bg-canvas px-1.5 py-0.5 font-mono text-xs">EvoWorld.to_json_dict()</code> exactly.
 						</p>
 					</div>
 					<div class="py-8 md:py-10 md:pl-12">
-						<h3 class="text-sm font-semibold uppercase tracking-wide text-accent">Static Deployment</h3>
+						<h2 class="text-sm font-semibold uppercase tracking-wide text-accent">Static Deployment</h2>
 						<p class="mt-2 max-w-[50ch] text-sm leading-relaxed text-muted">
 							The docs site and designer are pure frontend assets. Build once with Astro and host anywhere that serves static files.
 						</p>

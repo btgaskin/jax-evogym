@@ -9,7 +9,7 @@ const SHORTCUTS = [
 	{ label: 'Paint stroke', keys: 'Space + Drag' },
 	{ label: 'Erase voxel', keys: 'X / Right-click' },
 	{ label: 'Rectangle fill', keys: 'Shift + Drag' },
-	{ label: 'Pan viewport', keys: 'Drag empty / Middle-drag' },
+	{ label: 'Pan viewport', keys: 'Drag outside grid / Middle-drag' },
 	{ label: 'Zoom', keys: 'Scroll' },
 	{ label: 'Rotate object', keys: 'R' },
 	{ label: 'Mirror object', keys: 'Ctrl+M' },
@@ -29,11 +29,11 @@ export default function ShortcutSheet({ open, onOpenChange }: ShortcutSheetProps
 		<Dialog.Root open={open} onOpenChange={onOpenChange}>
 			<Dialog.Portal>
 				<Dialog.Backdrop className="dialog-backdrop fixed inset-0 z-40 bg-ink/30" />
-				<Dialog.Popup className="dialog-popup fixed left-1/2 top-1/2 z-50 w-[min(92vw,36rem)] -translate-x-1/2 -translate-y-1/2 rounded-[1.6rem] border border-border bg-panel p-6 shadow-2xl">
+				<Dialog.Popup className="dialog-popup fixed left-1/2 top-1/2 z-50 max-h-[90dvh] overflow-y-auto w-[min(92vw,36rem)] -translate-x-1/2 -translate-y-1/2 rounded-[1.6rem] border border-border bg-panel p-6 shadow-2xl">
 					<Dialog.Title className="text-lg font-semibold text-ink">
 						Keyboard shortcuts
 					</Dialog.Title>
-					<div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+					<div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
 						{SHORTCUTS.map((shortcut) => (
 							<div
 								key={shortcut.label}

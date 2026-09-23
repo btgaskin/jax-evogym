@@ -5,7 +5,7 @@ description: Public simulation and environment pytrees, plus rendering configura
 
 Simulation and environment state types are `NamedTuple` subclasses, which gives automatic JAX pytree registration for `jax.jit` and `jax.vmap`. `RenderConfig` is a standard Python dataclass because rendering runs outside the JIT-compiled simulation.
 
-**Batching model:** `SimState` is vmapped across a population. `SpringTopology`, `PhysicsConstants`, and `ActuatorInfo` are shared (unbatched) across the batch.
+**Batching model:** for a fixed morphology, `SimState` is batched while topology, constants, and actuator mappings can be shared. When morphology varies, its material and actuator data may also vary across the batch; see the [dense-grid guide](../../guides/dense-grid/).
 
 ---
 
@@ -41,7 +41,7 @@ The core mutable state passed through every simulation step. Vmapped across popu
 
 ## Shared simulation data
 
-These are constructed once per world and shared (not vmapped) across a population batch.
+These are constructed once per world and can be shared across rollouts with the same morphology.
 
 ### `PhysicsConstants`
 
@@ -348,7 +348,7 @@ Static, Python-side metadata built once and used each render call. Contains nump
 
 ### `RenderStepOutput`
 
-The minimal slice of simulation state returned by `env.step()` when rendering is enabled.
+The record captured by `make_render_episode_step` for rendering a rollout.
 
 | Field | Shape | dtype | Description |
 |---|---|---|---|
@@ -359,7 +359,7 @@ The minimal slice of simulation state returned by `env.step()` when rendering is
 
 ### `StepOutput`
 
-The full output of `env.step()` during training (no rendering overhead).
+The record returned by the `make_*_episode_step` factories for `lax.scan`. An environment’s `step()` itself returns `(obs, state, reward, done)`.
 
 | Field | Shape | dtype | Description |
 |---|---|---|---|

@@ -113,7 +113,7 @@ jax-evogym has two ways to build simulation data:
 | | Object-separated (`build.py`) | Dense grid (`jax_utils.py`) |
 |---|---|---|
 | **Entry point** | `compile_world_template()` | `precompute_grid()` + `jax_build_sim_state()` |
-| **Supports terrain** | Yes — multi-object worlds and fixed static terrain | No — single robot object only |
+| **Supports terrain** | Yes — multi-object worlds and fixed static terrain | Yes — robot and fixed terrain in one composited grid |
 | **JAX-native** | No — uses numpy, produces JAX arrays at the end | Yes — pure JAX, JIT-able, vmap-able |
 | **Use case** | Standard environments, custom worlds | Evolutionary search over morphology populations |
 

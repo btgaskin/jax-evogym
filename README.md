@@ -1,81 +1,117 @@
-# `jax-evogym`
+# JAX EvoGym
 
-## What This Library Is
+Build voxel robots, simulate their motion in JAX, and evaluate batches of controllers or body designs. `jax-evogym` reimplements the EvoGym soft-body simulator with JIT-compiled physics, seven built-in environments, a browser world designer, and a Python renderer.
 
-`jax-evogym` is a JAX-native EvoGym core library for soft-body robot simulation, world construction, rendering, and parity validation. The runtime is now built around **object-separated simulation** rather than a single composited robot-plus-terrain grid.
+[Documentation](https://jax-evogym.pages.dev/) · [Open the designer](https://jax-evogym.pages.dev/designer/) · [Quick start](https://jax-evogym.pages.dev/getting-started/quickstart/)
 
-Core guarantees:
+![A voxel robot with a rigid upper body, soft core, blue vertical actuators and orange horizontal actuators standing on fixed ground.](docs/assets/soft-body-world.png)
 
-- robot and terrain are compiled as separate objects
-- pure fixed terrain is static collider/render geometry, not dynamic simulation state
-- `FIXED` quads are the supported static terrain primitive
-- soft or mixed soft+fixed terrain remains dynamic
-- there are no shared robot-terrain simulation points
-- canonical corrected validation uses `30` physics substeps per env step
+*An example world at its initial state, drawn by the library’s renderer. This is a static illustration, not a trained locomotion result. [Reproduce the image](scripts/render_readme.py).*
 
-Slope terrain code is retained in the repository as an unsupported experimental
-geometry path, but it is not part of the stable public API or release contract.
+## What you can do
 
-## Project Status
-
-This repository is a public-alpha community research library. Its stable
-contract is documented in the
-[API boundary](https://jax-evogym.pages.dev/reference/api-boundary/),
-with release priorities and known limitations tracked in
-[ROADMAP.md](ROADMAP.md).
-
-Community-facing process files are intentionally lightweight:
-
-- [CONTRIBUTING.md](CONTRIBUTING.md): local checks, CI gates, and physics-change expectations
-- [CHANGELOG.md](CHANGELOG.md): user-facing release notes
-- [SECURITY.md](SECURITY.md): vulnerability reporting scope
-- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md): contributor expectations
-
-## Core Simulation Model
-
-Worlds are compiled object-by-object into reusable templates. Dynamic robot state, dynamic terrain state, static fixed terrain collider geometry, collision metadata, and render metadata are all built from those templates rather than reconstructed from a merged occupancy grid.
-
-The important rules are:
-
-- **Robot and terrain are separate objects.**
-- **Pure static-terrain non-robot objects are static-only.**
-  They contribute collider geometry, render geometry, and terrain observation samples, but they do not contribute dynamic points, masses, velocities, or springs to `SimState`.
-- **Stable static terrain uses `FIXED` cells only.**
-  Experimental slope cells still exist behind `allow_experimental_slopes=True`, but they are deliberately excluded from the stable builder contract. Sloped edges are geometry-only: normal contact may be inspected, while slope friction, support, grip, and stiction are disabled.
-- **Mixed or soft non-robot objects remain dynamic.**
-  This preserves anchored-soft tasks such as bridge-like terrain.
-- **Robot ownership is explicit.**
-  Robot points, actuators, deformation metadata, and render ownership come from object identity, not composited point reuse.
+- **Design worlds:** draw robots and terrain in the browser, validate them, and export EvoGym world JSON.
+- **Simulate tasks:** use the shared `reset()` / `step()` interface for walking, climbing, jumping, and shape-change environments.
+- **Batch rollouts:** combine `jax.jit`, `jax.vmap`, and `jax.lax.scan` for controller evaluation and morphology research.
+- **Build custom worlds:** compile reusable world templates, vary the robot body, and create mirrored configurations.
+- **Inspect results:** render rollouts as GIFs and compare the simulator with checked-in EvoGym reference traces.
 
 ## Install
 
-Base package:
+Requires **Python 3.11 or later**. Install from source; the package is not yet published on PyPI.
 
 ```bash
-pip install .
+git clone https://github.com/btgaskin/jax-evogym.git
+cd jax-evogym
+python -m venv .venv
+source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install ".[viz]"
 ```
 
-With visualization support:
+Use `pip install .` for the base package, `pip install ".[cuda,viz]"` for CUDA 12 on Linux, or `pip install -e ".[viz,dev]"` for development. The base package includes pinned CPU JAX dependencies; the visualization extra includes Pillow.
+
+## Quick start
+
+Create a three-cell robot and advance a built-in walking environment by one step:
+
+```python
+import jax.numpy as jnp
+import numpy as np
+from jax_evogym import H_ACT, SOFT, V_ACT, WalkerV0
+
+body = np.array([[H_ACT, SOFT, V_ACT]])
+env = WalkerV0(body)
+
+obs, state = env.reset()
+action = jnp.ones(env.n_actuators)
+obs, state, reward, done = env.step(state, action)
+
+print("Observation shape:", obs.shape)
+print("Reward:", float(reward))
+```
+
+Actions specify actuator target lengths relative to their resting lengths. This example supplies a constant action; learning a controller is a separate task. The [rendering guide](https://jax-evogym.pages.dev/guides/rendering/) shows how to capture a rollout and save a GIF.
+
+To load a world exported from the designer:
+
+```python
+from jax_evogym import EvoWorld, compile_world_template, instantiate_world
+
+world = EvoWorld.from_json("evogym-world.json")
+# Name the robot object "robot" in the designer, or pass its actual name here.
+template = compile_world_template(world, robot_name="robot")
+built = instantiate_world(template)
+print(built.sim_state.positions.shape)
+```
+
+See [Environments](https://jax-evogym.pages.dev/guides/environments/), [Build API](https://jax-evogym.pages.dev/core/build-api/), and [Variable Morphology](https://jax-evogym.pages.dev/guides/variable-morphology/) for the next steps.
+
+## Scope and status
+
+This is a **public-alpha research library**. The supported core uses square cells: rigid and soft materials, horizontal and vertical actuators, contractile cells, and fixed terrain.
+
+Worlds are compiled object by object. Robots and terrain have separate ownership; pure fixed terrain contributes collision and render geometry without adding dynamic simulation points. Soft terrain and mixed soft/fixed objects remain dynamic. The standard environment step runs 30 physics substeps.
+
+Reference-parity tests cover the documented task set and tolerances; they do not establish identical behavior for every possible world. Slopes are retained only as an unsupported, opt-in geometry path. Slope friction/support, general freeform terrain, and dynamic polygon bodies are outside the stable contract.
+
+Read the [API boundary](https://jax-evogym.pages.dev/reference/api-boundary/), [parity guide](https://jax-evogym.pages.dev/core/parity/), and [roadmap](ROADMAP.md) before extending the physics. The companion research project is [sensing-at-the-edges](https://github.com/btgaskin/sensing-at-the-edges).
+
+## Documentation and designer development
+
+The Astro/Starlight site runs independently of Python and JAX:
 
 ```bash
-pip install ".[viz]"
+cd site
+bun install --frozen-lockfile
+bun run dev --host 127.0.0.1
 ```
 
-For local development:
+Open the URL printed by Astro. The designer is at `/designer/` and its guide at `/designer/designer-guide/`.
+
+From `site/`, run `bun run test`, `bun run check`, and `bun run build` to validate the frontend. The output is a static site in `site/dist/`.
+
+## Tests and contribution
+
+Install the development extra before running Python checks:
 
 ```bash
-pip install -e ".[viz,dev]"
+uv run --extra dev pytest tests/
 ```
 
-If you use `uv`, the equivalent editable install is:
+The [parity harness](tests/parity_harness.py) consumes [checked-in reference traces](tests/reference_data). Re-run the relevant parity tests when changing physics or JAX versions. To reproduce the README illustration without running a simulation:
 
 ```bash
-uv pip install -e ".[viz,dev]"
+python scripts/render_readme.py
 ```
 
-`Pillow` is required for renderer output. It is included in `.[viz]`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for checks and contribution guidelines, [CHANGELOG.md](CHANGELOG.md) for release notes, [SECURITY.md](SECURITY.md) for vulnerability reporting, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
 
-## JAX Version Policy
+## JAX version policy
+
+The package pins `jax` and `jaxlib` to `0.9.0.1`. The existing version rationale and tracked issues are retained below; issue status can change independently of this release.
+
+<details>
+<summary>Version rationale and runtime mitigations</summary>
 
 This repository is pinned to:
 
@@ -101,211 +137,8 @@ Mitigations implemented in this repo:
 
 If you change JAX versions, rerun the parity suite in [`tests`](tests) before trusting any parity or stability result.
 
-## Quick Start
 
-### World creation
-
-```python
-import numpy as np
-
-from jax_evogym import EvoWorld, H_ACT, SOFT, V_ACT
-
-world = EvoWorld()
-world.add_from_array("robot", np.array([[H_ACT, SOFT, V_ACT]]), 0, 0)
-world.to_json("robot.json")
-```
-
-### Standard environment usage
-
-```python
-import jax.numpy as jnp
-import numpy as np
-
-from jax_evogym import H_ACT, SOFT, V_ACT, WalkerV0
-
-body = np.array([[H_ACT, SOFT, V_ACT]])
-env = WalkerV0(body)
-
-obs, state = env.reset()
-action = jnp.ones(env.n_actuators)
-obs, state, reward, done = env.step(state, action)
-```
-
-### Builder API
-
-```python
-import numpy as np
-
-from jax_evogym import EvoWorld, FIXED, H_ACT, SOFT, V_ACT
-from jax_evogym import compile_world_template, instantiate_world
-
-world = EvoWorld()
-world.add_from_array("ground", np.array([[FIXED, FIXED, FIXED, FIXED]]), 0, 0)
-world.add_from_array("robot", np.array([[H_ACT, SOFT, V_ACT]]), 1, 2)
-
-template = compile_world_template(world, robot_name="robot")
-built = instantiate_world(template)
-
-print(built.sim_state.positions.shape)
-print(built.static_collider_data.point_positions.shape)
-```
-
-## Templates, Mirroring, and Variable Morphology
-
-The core builder exposes both single-template and paired-template workflows:
-
-- `compile_world_template(world, robot_name="robot")`
-- `compile_world_templates(world, robot_name="robot", mirror_mode="paired")`
-- `instantiate_world(template, robot_override=None)`
-
-Paired mirroring:
-
-```python
-import numpy as np
-
-from jax_evogym import EvoWorld, FIXED, H_ACT, SOFT, V_ACT
-from jax_evogym import compile_world_templates, instantiate_world
-
-world = EvoWorld()
-world.add_from_array("floor", np.array([[FIXED, FIXED, FIXED, FIXED, FIXED]]), 0, 0)
-world.add_from_array("robot", np.array([[H_ACT, SOFT, V_ACT]]), 1, 2)
-
-template_set = compile_world_templates(world, robot_name="robot", mirror_mode="paired")
-
-primary_built = instantiate_world(template_set.primary)
-mirror_built = instantiate_world(template_set.mirror)
-```
-
-`WorldTemplateSet` contains:
-
-- `primary`
-- `mirror`
-- `mirror_mode`
-
-Mirrored template sets are intended to be evaluated **within the same genome** when you want paired primary/mirrored terrain semantics.
-
-### Variable morphology with `robot_override`
-
-`robot_override` lets you vary the robot’s morphology inside a fixed robot frame:
-
-```python
-import numpy as np
-
-from jax_evogym import CONTRACTILE, EMPTY, H_ACT, RIGID, SOFT, V_ACT
-from jax_evogym import compile_world_template, instantiate_world
-
-template = compile_world_template(world, robot_name="robot")
-
-dense = np.array([
-    [H_ACT, SOFT, V_ACT],
-    [SOFT, CONTRACTILE, RIGID],
-])
-
-sparse = np.array([
-    [H_ACT, EMPTY, V_ACT],
-    [EMPTY, CONTRACTILE, EMPTY],
-])
-
-dense_built = instantiate_world(template, robot_override=dense)
-sparse_built = instantiate_world(template, robot_override=sparse)
-```
-
-Important caveat:
-
-- `robot_override` varies morphology **inside a fixed robot frame only**
-- `instantiate_world` does **not** auto-mirror `robot_override`
-- if you want mirrored genome evaluation, you instantiate both templates explicitly
-
-## Terrain Semantics
-
-The runtime distinguishes terrain by object classification, not by a composited grid pass:
-
-- **Pure `FIXED` non-robot object**: static collider/render geometry only
-- **Mixed or soft non-robot object**: dynamic object
-
-This preserves bridge-like and anchored-soft tasks without forcing flat ground, walls, and fixed stairs into the dynamic simulation state.
-
-Unsupported slope note:
-
-- slope constants remain in `jax_evogym.constants`
-- legacy slope fixtures live under `tests/experimental_slope_fixtures`
-- public top-level imports intentionally do not export slope constants
-- `compile_world_template(...)` and `compile_world_templates(...)` reject slope cells by default
-- pass `allow_experimental_slopes=True` only for internal slope investigations and legacy fixtures
-- slope friction/support controls are compatibility no-ops; flat ground and flat static-terrain friction remain supported
-
-## Rendering
-
-Rendering now consumes the same ownership-aware geometry that the simulation uses:
-
-- dynamic positions come from `SimState`
-- static terrain is appended from `RenderInfo.static_point_positions`
-- cells are labeled by object ownership and dynamic/static status
-
-This means fixed terrain is rendered from true static geometry instead of from dynamically simulated terrain points.
-
-The renderer still reads its visual token document from [`src/jax_evogym/design_tool`](src/jax_evogym/design_tool).
-
-## Docs Site + Designer
-
-The browser designer now lives inside the Astro/Starlight docs site under [`site`](site).
-
-```bash
-bun --cwd site install
-bun --cwd site dev
-```
-
-Build the static site:
-
-```bash
-bun --cwd site build
-```
-
-The designer route is served at `/designer` during local development and in the static build. It imports and exports canonical EvoGym world JSON directly in the browser.
-
-Designer note: the public designer palette is limited to the stable voxel types (`RIGID`, `SOFT`, `FIXED`, `H_ACT`, `V_ACT`, `CONTRACTILE`). Slopes are omitted because they remain experimental and still need a defensible friction/support model before becoming stable terrain.
-
-Core docs migrated into the site currently include:
-
-- Core Architecture
-- Build API
-- Mirroring
-- Parity
-
-## Parity Validation
-
-Reference parity consumes the checked-in `.npz` traces under [`tests/reference_data`](tests/reference_data), driven by [`tests/parity_harness.py`](tests/parity_harness.py). The full suite covers Walker + multi-env reference parity, terrain stability, mirroring, structural terrain semantics, and variable morphology checks:
-
-```bash
-uv run --extra dev pytest tests/
-```
-
-## Tests
-
-Repository tests live in [`tests`](tests).
-
-Lightweight local suggestions:
-
-```bash
-pytest tests/test_world.py tests/test_render.py
-pytest tests/test_cpp_parity.py tests/test_multi_env_parity.py tests/test_terrain_stability.py
-```
-
-## Repository Layout
-
-- [`src/jax_evogym`](src/jax_evogym): core package
-- [`src/jax_evogym/build.py`](src/jax_evogym/build.py): object-separated world compilation and instantiation
-- [`src/jax_evogym/types.py`](src/jax_evogym/types.py): core runtime/build types
-- [`src/jax_evogym/render.py`](src/jax_evogym/render.py): renderer
-- [`site`](site): Astro/Starlight docs site and embedded browser designer
-- [`src/jax_evogym/design_tool`](src/jax_evogym/design_tool): shared render token helpers
-- [`tests`](tests): parity, stability, renderer, and world tests
-
-## Current Scope
-
-This README documents the standalone **core library**. The research code built on top of it lives in the companion repository, [sensing-at-the-edges](https://github.com/btgaskin/sensing-at-the-edges).
-
-The current stable scope is square-cell soft-body simulation with fixed static terrain, flat terrain friction, variable robot morphology, rendering, and parity validation. Slopes, friction-on-slope behavior, general freeform terrain, and dynamic polygon bodies remain future work or unsupported experimental code.
+</details>
 
 ## Acknowledgements
 

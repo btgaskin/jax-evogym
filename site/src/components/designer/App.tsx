@@ -239,7 +239,7 @@ function DesignerShell() {
 										<X size={14} />
 									</Dialog.Close>
 								</div>
-								<div className="designer-scroll grid min-h-0 min-w-0 flex-1 gap-4 overflow-y-auto overflow-x-hidden p-4">
+								<div className="designer-scroll grid auto-rows-max content-start min-h-0 min-w-0 flex-1 gap-4 overflow-y-auto overflow-x-hidden p-4">
 									<DesignerPanels
 										markerPlacementMode={markerPlacementMode}
 										onDeleteDialogOpenChange={setDeleteDialogOpen}
