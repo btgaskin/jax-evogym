@@ -36,7 +36,7 @@ function ActionButton({
 		<button
 			type="button"
 			className={cn(
-				'inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:border-accent hover:text-accent active:translate-y-px disabled:opacity-40 disabled:pointer-events-none',
+				'inline-flex min-h-11 min-w-11 justify-center items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:border-accent hover:text-accent active:translate-y-px disabled:opacity-40 disabled:pointer-events-none',
 				className,
 			)}
 			{...props}
@@ -69,7 +69,7 @@ export default function TopBar({
 	}, [newDocumentDialogOpen, state.document.gridHeight, state.document.gridWidth]);
 
 	return (
-		<div className="designer-scroll flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-border/80 bg-panel/90 px-3 py-2 md:px-5">
+		<div className="designer-scroll flex items-center gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap border-b border-border/80 bg-panel/90 px-2 py-1 sm:py-2 md:px-5">
 			<div className="flex items-center gap-1">
 				<ActionButton
 					aria-label="Undo (Ctrl+Z)"
@@ -89,11 +89,11 @@ export default function TopBar({
 				</ActionButton>
 			</div>
 
-			<div className="h-5 w-px bg-border/60" />
+			<div className="hidden sm:block h-5 w-px bg-border/60" />
 
 			<div className="flex items-center gap-1">
 				<Dialog.Root open={newDocumentDialogOpen} onOpenChange={onNewDocumentDialogOpenChange}>
-					<Dialog.Trigger className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-on-accent transition hover:opacity-90 active:translate-y-px">
+					<Dialog.Trigger className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-on-accent transition hover:opacity-90 active:translate-y-px">
 						New
 					</Dialog.Trigger>
 					<Dialog.Portal>
@@ -152,32 +152,32 @@ export default function TopBar({
 						</Dialog.Popup>
 					</Dialog.Portal>
 				</Dialog.Root>
-				<ActionButton onClick={() => void onOpenDocument()}>
+				<ActionButton aria-label="Import" title="Import" onClick={() => void onOpenDocument()}>
 					<UploadSimple size={14} weight="bold" />
-					Import
+					<span className="hidden sm:inline">Import</span>
 				</ActionButton>
-				<ActionButton onClick={() => void onSaveDocument()}>
+				<ActionButton aria-label="Export" title="Export" onClick={() => void onSaveDocument()}>
 					<DownloadSimple size={14} weight="bold" />
-					Export
+					<span className="hidden sm:inline">Export</span>
 				</ActionButton>
 			</div>
 
-			<div className="h-5 w-px bg-border/60" />
+			<div className="hidden sm:block h-5 w-px bg-border/60" />
 
 			<div className="flex items-center gap-1">
-				<ActionButton onClick={onValidate}>
+				<ActionButton className="hidden sm:inline-flex" onClick={onValidate}>
 					<CheckCircle size={14} weight="bold" />
 					Validate
 				</ActionButton>
-				<ActionButton onClick={onRequestFitView}>
+				<ActionButton aria-label="Fit" title="Fit canvas" onClick={onRequestFitView}>
 					<ArrowsOutSimple size={14} weight="bold" />
-					Fit
+					<span className="hidden sm:inline">Fit</span>
 				</ActionButton>
 			</div>
 			{documentHandle ? (
 				<>
-					<div className="h-5 w-px bg-border/60" />
-					<span className="rounded-full border border-border/70 bg-surface px-3 py-1.5 text-xs font-medium text-muted">
+					<div className="hidden sm:block h-5 w-px bg-border/60" />
+					<span className="hidden sm:inline rounded-full border border-border/70 bg-surface px-3 py-1.5 text-xs font-medium text-muted">
 						{documentHandle.fileName}
 					</span>
 				</>

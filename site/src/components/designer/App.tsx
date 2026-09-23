@@ -5,7 +5,7 @@ import { Dialog } from '@base-ui-components/react/dialog';
 import { FadersHorizontal, X } from '@phosphor-icons/react';
 
 import { getFittedView } from './canvas/draw';
-import CanvasEditor from './CanvasEditor';
+import CanvasEditor, { type EditingTool } from './CanvasEditor';
 import DocumentPanel from './DocumentPanel';
 import MetadataPanel from './MetadataPanel';
 import ObjectsPanel from './ObjectsPanel';
@@ -58,6 +58,7 @@ function DesignerPanels({
 function DesignerShell() {
 	const { state, dispatch } = useEditor();
 	const [view, setView] = useState<ViewState>(() => getFittedView(state.document, 1100, 720));
+	const [tool, setTool] = useState<EditingTool>('draw');
 	const [fitSignal, setFitSignal] = useState(0);
 	const [cursor, setCursor] = useState<CursorState | null>(null);
 	const [message, setMessage] = useState<SurfaceMessage | null>(null);
@@ -218,10 +219,14 @@ function DesignerShell() {
 				onValidate={onValidate}
 			/>
 			<div className="grid min-h-0 min-w-0 xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-				<section className="grid min-h-0 min-w-0 grid-rows-[auto_auto_1fr] gap-3 p-3 md:p-4 xl:grid-rows-[auto_1fr]">
+				<section className="designer-workspace grid min-h-0 min-w-0 grid-rows-[auto_auto_1fr] gap-2 p-2 md:p-3">
 					<VoxelPalette />
+					<div className="flex min-w-0 items-center gap-2">
+						<div className="flex flex-1 xl:max-w-sm gap-1" role="group" aria-label="Editing tool">
+							{(['draw', 'erase', 'move'] as const).map(value => <button key={value} type="button" aria-pressed={tool === value} onClick={() => setTool(value)} className={`min-h-11 flex-1 rounded-full border px-3 text-sm font-medium capitalize ${tool === value ? 'border-accent bg-accent text-on-accent' : 'border-border bg-surface text-ink'}`}>{value}</button>)}
+						</div>
 					<Dialog.Root open={mobileControlsOpen} onOpenChange={setMobileControlsOpen}>
-						<Dialog.Trigger className="xl:hidden inline-flex items-center justify-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-sm font-medium text-ink transition hover:border-accent hover:text-accent">
+						<Dialog.Trigger className="xl:hidden min-h-11 inline-flex items-center justify-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-sm font-medium text-ink transition hover:border-accent hover:text-accent">
 							<FadersHorizontal size={15} />
 							Controls
 						</Dialog.Trigger>
@@ -234,7 +239,7 @@ function DesignerShell() {
 									</Dialog.Title>
 									<Dialog.Close
 										aria-label="Close controls"
-										className="inline-flex size-8 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent"
+										className="inline-flex size-11 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent"
 									>
 										<X size={14} />
 									</Dialog.Close>
@@ -243,13 +248,15 @@ function DesignerShell() {
 									<DesignerPanels
 										markerPlacementMode={markerPlacementMode}
 										onDeleteDialogOpenChange={setDeleteDialogOpen}
-										setMarkerPlacementMode={setMarkerPlacementMode}
+										setMarkerPlacementMode={(mode) => { setMarkerPlacementMode(mode); setMobileControlsOpen(false); }}
 									/>
 								</div>
 							</Dialog.Popup>
 						</Dialog.Portal>
 					</Dialog.Root>
+					</div>
 					<CanvasEditor
+						tool={tool}
 						cursor={cursor}
 						fitSignal={fitSignal}
 						markerPlacementMode={markerPlacementMode}

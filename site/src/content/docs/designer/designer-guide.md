@@ -15,9 +15,19 @@ The interface has three regions:
 - **Canvas** — the main drawing area.
 - **Right sidebar** — stacked panels: Document, Metadata, Objects, Validation.
 
-On narrow screens, open **Controls** to access these panels. Close the drawer after selecting **Place on canvas**, then place the marker on the grid.
+On narrow screens, open **Controls** to access these panels. Selecting **Place on canvas** closes the drawer so you can place the marker immediately.
 
-The palette bar sits above the canvas and shows the two stable voxel groups plus object action buttons when an object is selected.
+The palette bar sits above the canvas and shows the two stable voxel groups plus object action buttons when an object is selected. On smaller screens, a material picker replaces the palette buttons.
+
+## Touch controls
+
+- **Draw** — tap a cell or drag to paint with the chosen material.
+- **Erase** — tap or drag to remove voxels.
+- **Move** — drag a voxel object or marker to move it; drag empty space to pan.
+- **Two fingers** — pinch to zoom and drag to pan in any mode. Lift both fingers before resuming editing.
+- **Zoom buttons** — use + and − in the canvas corner; use **Fit** in the top bar to see the whole grid.
+
+Zoom in before editing small cells. Drawing and erasing affect unlocked objects only. Undo and Redo are always available in the top bar. In landscape on a phone, the site header hides and the editing controls share one row to leave more room for the canvas.
 
 ---
 
@@ -27,15 +37,15 @@ Every voxel in the world belongs to a named object. Objects are listed in the Ob
 
 ### Creating an object
 
-Click anywhere on empty canvas space to place the first voxel. A new object is created automatically at that position. You can also click **Add** at the top of the Objects panel to create an empty object at the origin.
+Choose **Draw** and tap or click an empty grid cell to place the first voxel. A new object is created automatically at that position. You can also click **Add** at the top of the Objects panel to create an empty object at the origin.
 
 ### Selecting an object
 
-Click any painted voxel on the canvas to select the object it belongs to. Alternatively, use the **Select** button on the object's card in the Objects panel.
+Choose **Move**, then tap or click a painted voxel to select its object. Alternatively, use the **Select** button on the object's card in the Objects panel.
 
 ### Moving an object
 
-Drag a selected, unlocked object on the canvas to move it. You can also use the arrow keys when the canvas does not have keyboard focus.
+In **Move** mode, drag an unlocked object on the canvas to move it. You can also use the arrow keys when the canvas does not have keyboard focus.
 
 ### Renaming
 
@@ -59,17 +69,17 @@ Click the trash icon on the object's card. A confirmation dialog appears before 
 
 All drawing targets the currently selected object. If no object is selected, clicking on empty canvas space creates a new one.
 
-### Place (`Space` or click)
+### Place (Draw or `Space`)
 
-Click a grid cell to paint one voxel of the active type at that position. Pressing `Space` with the cursor over the canvas places a voxel at the current cursor position.
+In **Draw** mode, tap or click a grid cell to paint one voxel of the active type at that position. Pressing `Space` with the cursor over the canvas places a voxel at the current cursor position.
 
-### Paint stroke (`Space` + drag)
+### Paint stroke (Draw + drag)
 
-Hold `Space` and drag across the canvas to paint a continuous stroke of voxels. Each grid cell the cursor enters receives one voxel. Release `Space` to end the stroke.
+In **Draw** mode, drag across the canvas to paint a continuous stroke. Skipped cells between pointer positions are filled. On desktop, holding `Space` also enables painting in other modes.
 
-### Erase (`X` or right-click)
+### Erase (Erase, `X`, or right-click)
 
-Press `X` with the cursor over a voxel, or right-click a voxel, to erase it. This sets the cell back to empty within the owning object.
+Choose **Erase** and tap or drag over voxels. On desktop, you can also press `X` with the cursor over a voxel or right-click it. This sets the cell back to empty within the owning object.
 
 ### Rectangle fill (`Shift` + drag)
 
@@ -129,11 +139,11 @@ Deletes the selected object immediately (no confirmation when using the keyboard
 
 ### Pan
 
-Drag outside the world grid to pan the view. You can also drag with the middle mouse button from any canvas position. Clicking an empty cell inside the grid paints a voxel. The cursor changes to a grab cursor while panning.
+Choose **Move** and drag empty space to pan, or drag with two fingers in any mode. You can also drag with the middle mouse button from any canvas position.
 
 ### Zoom
 
-Scroll the mouse wheel over the canvas to zoom in or out, centred on the cursor position.
+Pinch with two fingers or use the canvas + and − buttons. On desktop, scroll the mouse wheel to zoom around the cursor.
 
 ### Fit (top bar)
 
@@ -169,7 +179,7 @@ The Metadata panel defines optional world markers and preview settings.
 - **Direction** is the initial heading: north, east, south, or west.
 - **Mirror Preview** draws reflected spawn, target, and direction markers across the grid's vertical axis. It does not change the objects or exported marker coordinates.
 
-Click **Place on canvas**, then click a grid cell to set a spawn or target marker. You can drag an existing marker to another grid cell. The X and Y fields also accept exact coordinates.
+Click **Place on canvas**, then click a grid cell to set a spawn or target marker. In **Move** mode, you can drag an existing marker to another grid cell. The X and Y fields also accept exact coordinates.
 
 ---
 
@@ -224,7 +234,7 @@ The designer preserves imported custom connectivity during import and export. If
 
 ### Validate
 
-Validation runs automatically about 600 ms after each edit. Click **Validate** to run it immediately without exporting. Issues appear in the Validation panel with a severity, an actionable message, and the affected object when applicable.
+Validation runs automatically about 600 ms after each edit. On larger screens, click **Validate** to run it immediately without exporting. On phones, open **Controls** to read the automatic validation results. Issues appear in the Validation panel with a severity, an actionable message, and the affected object when applicable.
 
 ---
 

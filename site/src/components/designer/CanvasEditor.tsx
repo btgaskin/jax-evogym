@@ -7,20 +7,18 @@ import type {
 	WheelEvent,
 } from 'react';
 
-import { Cube } from '@phosphor-icons/react';
+import { Cube, Minus, Plus } from '@phosphor-icons/react';
 
-import {
-	CANVAS_PADDING,
-	DEFAULT_CELL_SIZE,
-	type ThemeMode,
-} from './constants';
+import type { ThemeMode } from './constants';
 import { MAX_VIEW_SCALE, MIN_VIEW_SCALE, canvasToGrid, drawFrame, getFittedView } from './canvas/draw';
 import { useCanvasDPI } from './canvas/useCanvasDPI';
 import { getBrowserThemeMode, subscribeBrowserTheme } from './host';
 import { findObjectAt } from './lib/document';
-import { cn } from './lib/cn';
+import { transformView, strokeCells } from './canvas/gestures';
 import { useEditorDispatch, useEditorState } from './state/context';
 import type { CursorState, GridPoint, RectPreview, ViewState } from './types';
+
+export type EditingTool = 'draw' | 'erase' | 'move';
 
 type MarkerKey = 'spawn' | 'target';
 
@@ -29,10 +27,11 @@ type DragState =
 	| { type: 'move'; objectId: string; lastCell: GridPoint }
 	| { type: 'move-marker'; marker: MarkerKey; lastCell: GridPoint }
 	| { type: 'rect'; start: GridPoint; current: GridPoint }
-	| { type: 'paint' }
+	| { type: 'paint' | 'erase' }
 	| null;
 
 interface CanvasEditorProps {
+	tool: EditingTool;
 	cursor: CursorState | null;
 	fitSignal: number;
 	markerPlacementMode: MarkerKey | null;
@@ -43,6 +42,7 @@ interface CanvasEditorProps {
 }
 
 export default function CanvasEditor({
+	tool,
 	cursor,
 	fitSignal,
 	markerPlacementMode,
@@ -56,6 +56,10 @@ export default function CanvasEditor({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const dragRef = useRef<DragState>(null);
+	const touches = useRef(new Map<number, { x: number; y: number }>());
+	const pendingTouch = useRef<PointerEvent<HTMLCanvasElement> | null>(null);
+	const pinching = useRef(false);
+	const pinch = useRef<{ center: GridPoint; distance: number; view: ViewState } | null>(null);
 	const fitStateRef = useRef({ initialized: false, signal: 0 });
 	const spaceHeldRef = useRef(false);
 	const lastPaintCellRef = useRef<GridPoint | null>(null);
@@ -180,8 +184,8 @@ export default function CanvasEditor({
 	};
 
 	const updateCursorStyle = (grid: GridPoint | null) => {
-		if (markerPlacementMode || spaceHeldRef.current) {
-			setCursorStyle('crosshair');
+		if (markerPlacementMode || spaceHeldRef.current || tool !== 'move') {
+			setCursorStyle(tool === 'erase' ? 'cell' : 'crosshair');
 			return;
 		}
 		if (!grid) {
@@ -204,9 +208,8 @@ export default function CanvasEditor({
 		}
 	};
 
-	const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
+	const startEdit = (event: PointerEvent<HTMLCanvasElement>) => {
 		const grid = getGrid(event);
-		event.currentTarget.setPointerCapture(event.pointerId);
 
 		// Middle mouse button -> pan
 		if (event.button === 1) {
@@ -240,7 +243,7 @@ export default function CanvasEditor({
 			return;
 		}
 
-		if (grid) {
+		if (grid && tool === 'move') {
 			const marker = markerAtPoint(grid);
 			if (marker) {
 				dragRef.current = { type: 'move-marker', marker, lastCell: grid };
@@ -249,18 +252,17 @@ export default function CanvasEditor({
 			}
 		}
 
-		// Space held -> start paint drag
-		if (spaceHeldRef.current && grid) {
-			dragRef.current = { type: 'paint' };
-			lastPaintCellRef.current = grid;
-			dispatch({ type: 'PAINT_AT', worldX: grid.x, worldY: grid.y });
-			return;
-		}
-
-		// Shift held -> rect drag
+		// Keep the desktop rectangle shortcut in every tool.
 		if (event.shiftKey && grid) {
 			dragRef.current = { type: 'rect', start: grid, current: grid };
 			setRectPreview({ start: grid, current: grid });
+			return;
+		}
+		if (grid && (spaceHeldRef.current || tool !== 'move')) {
+			const erase = tool === 'erase' && !spaceHeldRef.current;
+			dragRef.current = { type: erase ? 'erase' : 'paint' };
+			lastPaintCellRef.current = grid;
+			dispatch({ type: erase ? 'ERASE_AT' : 'PAINT_AT', worldX: grid.x, worldY: grid.y });
 			return;
 		}
 
@@ -289,12 +291,52 @@ export default function CanvasEditor({
 				setCursorStyle('grabbing');
 			}
 		} else {
-			// Click on empty cell -> paint single voxel
-			dispatch({ type: 'PAINT_AT', worldX: grid.x, worldY: grid.y });
+			// Move mode pans from empty space without changing the document.
+			dispatch({ type: 'SELECT_OBJECT', objectId: null });
+			dragRef.current = { type: 'pan', startX: event.clientX, startY: event.clientY, originX: view.offsetX, originY: view.offsetY };
+		}
+	};
+
+	const touchGeometry = () => {
+		const [a, b] = [...touches.current.values()];
+		const rect = canvasRef.current!.getBoundingClientRect();
+		return { center: { x: (a.x + b.x) / 2 - rect.left, y: (a.y + b.y) / 2 - rect.top }, distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) };
+	};
+
+	const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
+		event.currentTarget.setPointerCapture(event.pointerId);
+		if (event.pointerType !== 'touch') { startEdit(event); return; }
+		touches.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+		if (touches.current.size === 1 && !pinching.current) {
+			// Defer a tap until release, so the first finger of a pinch cannot paint.
+			pendingTouch.current = event;
+		} else if (touches.current.size === 2) {
+			pendingTouch.current = null;
+			dragRef.current = null;
+			setRectPreview(null);
+			pinching.current = true;
+			pinch.current = { ...touchGeometry(), view };
 		}
 	};
 
 	const onPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
+		if (event.pointerType === 'touch' && touches.current.has(event.pointerId)) {
+			touches.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+			if (pinching.current) {
+				if (touches.current.size === 2 && pinch.current) {
+					const next = touchGeometry();
+					const initial = pinch.current;
+					setView(transformView(initial.view, metrics.height, initial.center, next.center, next.distance / initial.distance));
+				}
+				return;
+			}
+			const pending = pendingTouch.current;
+			if (pending) {
+				if (Math.hypot(event.clientX - pending.clientX, event.clientY - pending.clientY) < 6) return;
+				pendingTouch.current = null;
+				startEdit(pending);
+			}
+		}
 		const grid = getGrid(event);
 		const drag = dragRef.current;
 
@@ -316,10 +358,12 @@ export default function CanvasEditor({
 			return;
 		}
 
-		if (drag.type === 'paint') {
+		if (drag.type === 'paint' || drag.type === 'erase') {
 			const last = lastPaintCellRef.current;
 			if (!last || grid.x !== last.x || grid.y !== last.y) {
-				dispatch({ type: 'PAINT_AT', worldX: grid.x, worldY: grid.y });
+				for (const cell of strokeCells(last ?? grid, grid)) {
+					dispatch({ type: drag.type === 'erase' ? 'ERASE_AT' : 'PAINT_AT', worldX: cell.x, worldY: cell.y });
+				}
 				lastPaintCellRef.current = grid;
 			}
 			return;
@@ -356,8 +400,13 @@ export default function CanvasEditor({
 	};
 
 	const clearDrag = (event: PointerEvent<HTMLCanvasElement>) => {
+		if (pendingTouch.current && event.type === 'pointerup' && !pinching.current) startEdit(event);
+		pendingTouch.current = null;
+		touches.current.delete(event.pointerId);
+		if (touches.current.size < 2) pinch.current = null;
+		if (touches.current.size === 0) pinching.current = false;
 		const drag = dragRef.current;
-		if (drag?.type === 'rect') {
+		if (drag?.type === 'rect' && event.type === 'pointerup') {
 			dispatch({
 				type: 'PAINT_RECT',
 				start: drag.start,
@@ -435,52 +484,54 @@ export default function CanvasEditor({
 		const rect = canvasRef.current.getBoundingClientRect();
 		const pointerX = event.clientX - rect.left;
 		const pointerY = event.clientY - rect.top;
-		const beforeX = (pointerX - CANVAS_PADDING - view.offsetX) / (DEFAULT_CELL_SIZE * view.scale);
-		const beforeY =
-			(metrics.height - CANVAS_PADDING + view.offsetY - pointerY) / (DEFAULT_CELL_SIZE * view.scale);
-		const factor = event.deltaY > 0 ? 0.92 : 1.08;
-		const nextScale = Math.min(MAX_VIEW_SCALE, Math.max(MIN_VIEW_SCALE, view.scale * factor));
-		const cellSize = DEFAULT_CELL_SIZE * nextScale;
-
-		setView({
-			scale: nextScale,
-			offsetX: pointerX - CANVAS_PADDING - beforeX * cellSize,
-			offsetY: pointerY - metrics.height + CANVAS_PADDING + beforeY * cellSize,
-		});
+		setView(transformView(view, metrics.height, { x: pointerX, y: pointerY }, { x: pointerX, y: pointerY }, event.deltaY > 0 ? 0.92 : 1.08));
 	};
 
 	const hasObjects = state.document.objects.length > 0;
 
 	return (
-		<div className="designer-panel grid min-h-0 min-w-0 overflow-hidden rounded-[1.8rem] border border-border/80 bg-canvas shadow-sm">
+		<div className="designer-canvas designer-panel grid min-h-0 min-w-0 overflow-hidden rounded-[1.8rem] border border-border/80 bg-canvas shadow-sm">
 			<div ref={containerRef} className="designer-grid-bg relative min-h-0 min-w-0">
 				<canvas
 					ref={canvasRef}
-					aria-label="Voxel world canvas. Use arrow keys to move the grid cursor, Space to place a voxel, and X to erase."
+					aria-label="Voxel world canvas. Choose Draw, Erase, or Move; use two fingers to pan and zoom. Use arrow keys to move the grid cursor, Space to place a voxel, and X to erase."
 					className="block size-full focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
 					role="application"
-					style={{ cursor: cursorStyle }}
+					style={{ cursor: cursorStyle, touchAction: 'none' }}
 					tabIndex={0}
 					onContextMenu={onContextMenu}
 					onFocus={() => setCursor((current) => current ?? { x: 0, y: 0 })}
 					onKeyDown={onCanvasKeyDown}
 					onPointerCancel={clearDrag}
+					onLostPointerCapture={clearDrag}
 					onPointerDown={onPointerDown}
 					onPointerMove={onPointerMove}
 					onPointerUp={clearDrag}
 					onWheel={onWheel}
 				/>
-				{!hasObjects && (
+				<div className="absolute right-2 top-2 flex rounded-full border border-border bg-panel shadow-sm" role="group" aria-label="Canvas zoom">
+					{[{ label: 'Zoom out', factor: 0.8, Icon: Minus }, { label: 'Zoom in', factor: 1.25, Icon: Plus }].map(({ label, factor, Icon }) => (
+						<button key={label} type="button" aria-label={label} title={label} className="inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-surface disabled:opacity-40"
+							disabled={factor > 1 ? view.scale >= MAX_VIEW_SCALE : view.scale <= MIN_VIEW_SCALE}
+							onClick={() => { const center = { x: metrics.width / 2, y: metrics.height / 2 }; setView(current => transformView(current, metrics.height, center, center, factor)); }}><Icon size={18} /></button>
+					))}
+				</div>
+				{markerPlacementMode && (
+					<div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2 rounded-2xl border border-border bg-panel px-3 text-sm text-ink" role="status">
+						<span>Tap a grid cell to place {markerPlacementMode}.</span>
+						<button type="button" className="min-h-11 px-2 font-medium text-accent" onClick={() => setMarkerPlacementMode(null)}>Cancel</button>
+					</div>
+				)}
+				{!hasObjects && !markerPlacementMode && (
 					<div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
-						<div className="rounded-[1.25rem] border border-dashed border-border/50 bg-panel/80 px-10 py-8">
+						<div className="rounded-[1.25rem] border border-dashed border-border/50 bg-panel/80 px-4 py-3 sm:px-10 sm:py-8">
 							<Cube size={48} weight="thin" className="mx-auto text-muted/30" />
-							<p className="mt-3 text-sm font-medium text-ink">Click anywhere to place your first voxel</p>
+							<p className="mt-3 text-sm font-medium text-ink">Draw your first voxel</p>
 							<p className="mt-2 max-w-xl text-xs text-muted">
 								Build robots and terrain from voxels, then export world JSON for the jax-evogym simulator.
 							</p>
 							<p className="mt-2 max-w-xl text-xs text-muted">
-								Pick a voxel type from the palette above, then click a grid cell. Hold Space while dragging to paint a stroke. Press{' '}
-								<kbd className="rounded border border-border/60 bg-surface px-1 py-0.5 font-mono text-[11px]">?</kbd> for keyboard shortcuts.
+								Choose Draw and a material, then tap or drag on the grid. Pinch with two fingers to zoom and pan.
 							</p>
 						</div>
 					</div>

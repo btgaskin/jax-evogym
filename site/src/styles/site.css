@@ -329,3 +329,13 @@ pre,
 	html { scroll-behavior: auto; }
 	.dialog-backdrop, .dialog-popup { transition: none; }
 }
+
+/* Landscape phones need the height for editing; the Guide remains in the status bar. */
+@media (max-height: 500px) and (max-width: 1023px) and (orientation: landscape) {
+	.designer-header { display: none; }
+	.designer-workspace {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		grid-template-rows: auto minmax(0, 1fr);
+	}
+	.designer-canvas { grid-column: 1 / -1; }
+}

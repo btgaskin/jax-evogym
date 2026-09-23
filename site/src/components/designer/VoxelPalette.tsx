@@ -117,12 +117,12 @@ function ObjectActions() {
 					: 'pointer-events-none w-0 overflow-hidden opacity-0',
 			)}
 		>
-			<div className="mr-2 h-5 w-px shrink-0 bg-border/60" />
+			<div className="hidden lg:block mr-2 h-5 w-px shrink-0 bg-border/60" />
 			<button
 				type="button"
 				aria-label="Rotate selected object clockwise"
 				title="Rotate clockwise (R)"
-				className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent active:translate-y-px"
+				className="inline-flex size-11 lg:size-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent active:translate-y-px"
 				onClick={() => dispatch({ type: 'ROTATE_OBJECT', objectId })}
 			>
 				<ArrowClockwise size={14} />
@@ -131,7 +131,7 @@ function ObjectActions() {
 				type="button"
 				aria-label="Mirror selected object horizontally"
 				title="Mirror (Ctrl+M)"
-				className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent active:translate-y-px"
+				className="inline-flex size-11 lg:size-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent active:translate-y-px"
 				onClick={() => dispatch({ type: 'MIRROR_OBJECT', objectId })}
 			>
 				<FlipHorizontal size={14} />
@@ -140,7 +140,7 @@ function ObjectActions() {
 				type="button"
 				aria-label="Duplicate selected object"
 				title="Duplicate (Ctrl+D)"
-				className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent active:translate-y-px"
+				className="inline-flex size-11 lg:size-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent hover:text-accent active:translate-y-px"
 				onClick={() => dispatch({ type: 'DUPLICATE_OBJECT', objectId })}
 			>
 				<CopySimple size={14} />
@@ -149,7 +149,7 @@ function ObjectActions() {
 				type="button"
 				aria-label="Delete selected object"
 				title="Delete (Del)"
-				className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-danger/25 bg-danger/6 text-danger transition hover:border-danger active:translate-y-px"
+				className="inline-flex size-11 lg:size-8 shrink-0 items-center justify-center rounded-full border border-danger/25 bg-danger/6 text-danger transition hover:border-danger active:translate-y-px"
 				onClick={() => dispatch({ type: 'DELETE_OBJECT', objectId })}
 			>
 				<Trash size={14} />
@@ -159,8 +159,14 @@ function ObjectActions() {
 }
 
 export default function VoxelPalette() {
+	const state = useEditorState();
+	const dispatch = useEditorDispatch();
 	return (
-		<section className="designer-panel designer-scroll flex min-w-0 items-center gap-4 overflow-x-auto whitespace-nowrap rounded-[1.5rem] px-4 py-3">
+		<section className="designer-panel designer-scroll flex min-w-0 items-center gap-1 lg:gap-4 overflow-x-auto whitespace-nowrap rounded-[1.5rem] px-1 py-1 lg:px-4 lg:py-3">
+			<select aria-label="Drawing material" className="lg:hidden min-h-11 min-w-0 flex-1 rounded-full border border-border bg-surface px-2 text-base text-ink" value={state.selectedVoxelType} onChange={event => dispatch({ type: 'SELECT_VOXEL_TYPE', voxelType: Number(event.target.value) as VoxelType })}>
+				{VOXEL_GROUPS.map(group => <optgroup key={group.key} label={group.label}>{group.types.map(type => <option key={type} value={type}>{VOXEL_DEFINITION_BY_TYPE[type]?.label}</option>)}</optgroup>)}
+			</select>
+			<div className="hidden lg:flex items-center gap-4">
 			{VOXEL_GROUPS.map((group, index) => (
 				<GroupCluster
 					key={group.key}
@@ -170,7 +176,7 @@ export default function VoxelPalette() {
 					hotkey={GROUP_HOTKEYS[index]?.toUpperCase() ?? String(index + 1)}
 				/>
 			))}
-
+			</div>
 			<ObjectActions />
 		</section>
 	);
