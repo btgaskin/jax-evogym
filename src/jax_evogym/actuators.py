@@ -44,7 +44,10 @@ def set_actuator_goals(
     """
     indices = actuator_info.cell_spring_indices          # (n_cells, 2)
     flat_indices = indices.flatten()                      # (n_cells*2,)
-    flat_actions = jnp.repeat(action, 2)                 # (n_cells*2,)
+    # Dense-grid builders pad inactive cells with repeated dummy indices.
+    # Valid actuator cells always reference two distinct edge springs.
+    active = indices[:, 0] != indices[:, 1]
+    flat_actions = jnp.repeat(jnp.where(active, action, 0.0), 2)
 
     # Zero actuated spring goals, scatter-add actions
     goals = jnp.where(
@@ -110,8 +113,11 @@ def set_per_axis_goals(
 
     h_indices = h_pairs.flatten()
     v_indices = v_pairs.flatten()
-    h_values = jnp.repeat(h_action, 2)
-    v_values = jnp.repeat(v_action, 2)
+    # Builders encode disabled axes as a repeated dummy spring index.
+    # Valid cell edges always use two distinct springs. Mask before scattering
+    # so passive cells and disabled axes cannot add a goal to the dummy spring.
+    h_values = jnp.repeat(jnp.where(h_pairs[:, 0] != h_pairs[:, 1], h_action, 0.0), 2)
+    v_values = jnp.repeat(jnp.where(v_pairs[:, 0] != v_pairs[:, 1], v_action, 0.0), 2)
 
     goals = jnp.where(info.actuated_spring_mask, 0.0, state.spring_rest_length_goal)
     n_springs = int(goals.shape[0])

@@ -29,7 +29,7 @@ read/write paths.
 | `grid_width` | integer | Width of the world grid in voxels. |
 | `grid_height` | integer | Height of the world grid in voxels. |
 | `objects` | object | Named world objects. Keys are object names; values are per-object records. |
-| `metadata` | object, optional | Designer-only spawn, target, direction, and mirror settings. Other consumers may ignore this extension. |
+| `metadata` | object, optional | Designer-only spawn, target, direction, and mirror annotations. They do not configure simulation behaviour. |
 
 The declared width and height are part of the coordinate system. The Python
 loader retains them even when objects occupy only a small part of the grid, so
@@ -180,7 +180,9 @@ displays y-up (row 0 at the bottom), matching the JSON convention.
 
 Designer exports include an optional top-level `metadata` object with `spawn`,
 `target`, `direction`, and `mirror_enabled` fields. It is a designer-only
-extension: `EvoWorld.from_json` and other consumers may ignore it. Object
+extension: `EvoWorld.from_json` ignores it and `EvoWorld.to_json` omits it.
+Keep the designer export to preserve annotations. Spawn does not reposition a
+robot, target does not define a task reward, and direction does not rotate a body. Object
 positions, voxel types, declared grid dimensions, and imported custom
 connectivity remain in the canonical fields described above.
 

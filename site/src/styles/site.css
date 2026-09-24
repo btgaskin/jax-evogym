@@ -339,3 +339,14 @@ pre,
 	}
 	.designer-canvas { grid-column: 1 / -1; }
 }
+
+/* Tailwind's reset removes native list markers; restore them in doc prose. */
+:root .sl-markdown-content ul:not(.not-content ul) {
+	list-style-type: disc;
+	padding-inline-start: 1.5rem;
+}
+
+:root .sl-markdown-content ol:not(.not-content ol) {
+	list-style-type: decimal;
+	padding-inline-start: 1.5rem;
+}

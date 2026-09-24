@@ -3,6 +3,8 @@ title: Variable Morphology
 description: Vary robot design at runtime using robot_override and the dense grid pipeline.
 ---
 
+Use this guide when candidate bodies change, rather than only controller parameters. Read [Evolutionary Search](../evolutionary-search/) for the evaluation contract. The sections below explain which build path supports each kind of body change.
+
 jax-evogym supports two mechanisms for varying robot morphology:
 
 1. **`robot_override`** — swap the robot's body within a fixed template frame

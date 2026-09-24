@@ -3,6 +3,8 @@ title: Environments
 description: All 7 built-in environments with observations, rewards, and done conditions.
 ---
 
+Choose a built-in task when you want established terrain, observations, rewards, and completion rules. Start with [First Simulation](../../getting-started/first-simulation/) if you have not run an episode yet. For your own exported terrain, use [Designer to Simulation](../designer-world/).
+
 All environments share a common interface:
 
 ```python
@@ -155,6 +157,21 @@ final_state, outputs = jax.lax.scan(episode_step, init_state, actions)
 ```
 
 The `StepOutput` contains `obs`, `reward`, `done`, and `positions` at each step.
+
+## Controllers and evolutionary search
+
+An environment supplies physics, observations, rewards, and episode termination.
+Your controller chooses actions from those observations and any internal state;
+your search algorithm decides which controller parameters to evaluate next.
+The constant-action rollout above demonstrates the stepping interface, not a
+trained controller.
+
+Continue to [Controllers and Actions](../controllers/) for action ordering and episode handling, or [Custom Environments](../custom-environments/) to change the task. Then [Evaluate Candidates](../batched-evaluation/) explains how to compare policies.
+
+For an advanced application, see [Sensing at the Edges](../../research/). Its
+research code combines a distributed controller with quality-diversity search
+and a custom task. It uses per-axis contractile actuation rather than the
+scalar H_ACT/V_ACT action path used by the built-in environments here.
 
 ## Constructor parameters
 

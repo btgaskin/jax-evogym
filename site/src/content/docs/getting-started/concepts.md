@@ -3,6 +3,10 @@ title: Concepts
 description: How the pieces of jax-evogym fit together — the mental model you need before diving deeper.
 ---
 
+JAX EvoGym separates the world definition, simulation state, controller, and task. The designer edits world geometry. A controller supplies actions. An environment adds observations, rewards, and completion rules around the physics.
+
+The documentation follows those reader tasks: **Getting Started** introduces a working simulation; **Build and Control** covers worlds and policies; **Evaluate and Evolve** covers comparison and search. **Supporting Guides** explain rendering and advanced construction. Use **Reference** and **Core Internals** when you need exact interfaces or implementation details.
+
 ## The three-phase pipeline
 
 Every jax-evogym simulation passes through three phases:
@@ -60,7 +64,7 @@ experimental geometry only and are rejected by stable compilation.
 - **External forces**: collision forces accumulated each substep, cleared after integration
 - **Friction memory**: optional non-slope terrain friction fields used by opt-in stiction models
 
-Everything else — spring topology, physics constants, actuator info, collision geometry — is shared across the batch and does not appear in `SimState`.
+For a fixed body and world, spring topology, physics constants, actuator mappings, and collision geometry can be shared across rollouts. When morphology varies, the material, actuator, and collision data may vary too; the dense-grid builder gives those arrays compatible shapes for batching.
 
 ## The simulation loop
 
@@ -122,3 +126,7 @@ The built-in environments use the object-separated pipeline. The dense grid pipe
 ## NamedTuples as pytrees
 
 All state types (`SimState`, `EnvState`, `CollisionData`, etc.) are Python `NamedTuple` subclasses. JAX automatically registers NamedTuples as pytrees, so they work with `jax.jit`, `jax.vmap`, and `jax.lax.scan` without custom registration.
+
+## Try the API
+
+Continue to [Quick Start](../quickstart/) for three small Python examples, then [First Simulation](../first-simulation/) for a complete rollout.

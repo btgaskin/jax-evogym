@@ -24,7 +24,9 @@ jobs:
           enable-cache: true
 
       - name: Run deterministic core tests
-        run: uv run --extra dev pytest -q tests
+        run: uv run --extra dev --extra viz pytest -q tests
+        env:
+          JAX_EVOGYM_TEST_BATCH_EXAMPLES: "1"
 
       - name: Build package artifacts
         run: uv build --wheel --sdist
@@ -85,10 +87,13 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run site tests
-        run: bun test
+        run: bun run test
 
       - name: Type-check docs site
         run: bun run check
 
       - name: Build docs site
         run: bun run build
+
+      - name: Check built documentation links
+        run: python ../scripts/check_docs_links.py dist

@@ -28,23 +28,41 @@ export default defineConfig({
 					href: 'https://github.com/btgaskin/jax-evogym',
 				},
 			],
+			// Group by reader task; order prerequisites before dependent workflows.
 			sidebar: [
 				{
 					label: 'Getting Started',
 					items: [
 						{ label: 'Installation', slug: 'getting-started/installation' },
-						{ label: 'Quick Start', slug: 'getting-started/quickstart' },
 						{ label: 'Concepts', slug: 'getting-started/concepts' },
+						{ label: 'Quick Start', slug: 'getting-started/quickstart' },
+						{ label: 'First Simulation', slug: 'getting-started/first-simulation' },
 					],
 				},
 				{
-					label: 'Guides',
+					label: 'Build and Control',
 					items: [
+						{ label: 'Designer Guide', slug: 'designer/designer-guide' },
+						{ label: 'Designer to Simulation', slug: 'guides/designer-world' },
 						{ label: 'Environments', slug: 'guides/environments' },
-						{ label: 'Rendering', slug: 'guides/rendering' },
+						{ label: 'Controllers and Actions', slug: 'guides/controllers' },
 						{ label: 'Custom Environments', slug: 'guides/custom-environments' },
+					],
+				},
+				{
+					label: 'Evaluate and Evolve',
+					items: [
+						{ label: 'Evaluate Candidates', slug: 'guides/batched-evaluation' },
+						{ label: 'Evolutionary Search', slug: 'guides/evolutionary-search' },
 						{ label: 'Variable Morphology', slug: 'guides/variable-morphology' },
+					],
+				},
+				{
+					label: 'Supporting Guides',
+					items: [
+						{ label: 'Rendering', slug: 'guides/rendering' },
 						{ label: 'Dense Grid Pipeline', slug: 'guides/dense-grid' },
+						{ label: 'Troubleshooting', slug: 'guides/troubleshooting' },
 					],
 				},
 				{
@@ -59,18 +77,12 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Core',
+					label: 'Core Internals',
 					items: [
 						{ label: 'Architecture', slug: 'core/architecture' },
 						{ label: 'Build API', slug: 'core/build-api' },
 						{ label: 'Mirroring', slug: 'core/mirroring' },
 						{ label: 'Parity', slug: 'core/parity' },
-					],
-				},
-				{
-					label: 'Designer',
-					items: [
-						{ label: 'User Guide', slug: 'designer/designer-guide' },
 					],
 				},
 				{ label: 'Research & Data', slug: 'research' },

@@ -20,13 +20,13 @@ python -m pip install .
 With visualization support (includes Pillow):
 
 ```bash
-pip install ".[viz]"
+python -m pip install ".[viz]"
 ```
 
 For local development:
 
 ```bash
-pip install -e ".[viz,dev]"
+python -m pip install -e ".[viz,dev]"
 ```
 
 If you use `uv`:
@@ -40,7 +40,7 @@ uv pip install -e ".[viz,dev]"
 The base install includes the pinned JAX version for CPU use. For CUDA 12 on Linux, install the project CUDA extra from the source checkout:
 
 ```bash
-pip install ".[cuda]"
+python -m pip install ".[cuda]"
 ```
 
 This keeps the exact JAX version that the test suite validates while installing the CUDA backend.
@@ -52,14 +52,21 @@ See the [JAX installation guide](https://jax.readthedocs.io/en/latest/installati
 The documentation site and browser-based designer are a separate Astro/Starlight frontend. They do not require JAX.
 
 ```bash
-bun --cwd site install
-bun --cwd site dev
+cd site
+bun install --frozen-lockfile
+bun run dev --host 127.0.0.1
 ```
 
 Build the static site:
 
 ```bash
-bun --cwd site build
+bun run build  # from site/
 ```
 
 The designer is served at `/designer` during local development and in the static build.
+
+## Choose your next step
+
+Read [Concepts](../concepts/) for the system's structure, then [Quick Start](../quickstart/) for a short API introduction and [First Simulation](../first-simulation/) for a complete rollout.
+
+If you only want to draw a world, the [Designer Guide](../../designer/designer-guide/) needs no Python installation. Later, [Designer to Simulation](../../guides/designer-world/) explains how to run that export in Python.

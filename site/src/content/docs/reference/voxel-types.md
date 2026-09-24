@@ -53,10 +53,12 @@ STABLE_WORLD_CELL_TYPES = {EMPTY, FIXED, RIGID, SOFT, H_ACT, V_ACT, CONTRACTILE}
 | EMPTY | Yes (disables cell) | Yes | — | — |
 | RIGID | Yes | Yes | Yes | No |
 | SOFT | Yes | Yes | Yes | No |
-| H_ACT | Yes | No | Yes | No |
-| V_ACT | Yes | No | Yes | No |
-| CONTRACTILE | Yes | No | Yes | No |
-| FIXED | No | Yes | In mixed objects | In pure fixed objects |
+| H_ACT | Yes | Yes (uncontrolled) | Yes | No |
+| V_ACT | Yes | Yes (uncontrolled) | Yes | No |
+| CONTRACTILE | Yes | Yes (uncontrolled) | Yes | No |
+| FIXED | Yes (anchors points) | Yes | In mixed objects | In pure fixed objects |
+
+Actuator mappings control only the named robot. Actuator material in other objects does not receive actions through those mappings. Fixed cells in the robot anchor their points; they are not useful for a freely moving body.
 
 A terrain object containing only `FIXED` cells is compiled as **static** — it
 contributes collider/render geometry but no dynamic points, masses, or springs

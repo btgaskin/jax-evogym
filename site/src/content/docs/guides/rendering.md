@@ -3,11 +3,10 @@ title: Rendering
 description: Generate GIFs from simulation rollouts using the PIL-based renderer.
 ---
 
-Rendering is a post-hoc process, decoupled from JIT-compiled simulation. The typical workflow:
+For a complete runnable example, start with [First Simulation](../../getting-started/first-simulation/).
+Rendering happens after simulation: record positions and spring lengths, convert them to frames, then save a GIF. It runs outside the JIT-compiled physics loop.
 
-1. Run a fast fitness pass to identify good individuals
-2. Rerun the best with a render-compatible step function to capture positions and spring state
-3. Convert captured data to GIF frames
+When evaluating a population, compute fitness first and replay only selected candidates for rendering. This avoids storing full trajectories for every candidate.
 
 ## RenderConfig
 
@@ -27,7 +26,7 @@ config = RenderConfig(
 
 | Field | Default | Description |
 |-------|---------|-------------|
-| `enabled` | `False` | Master switch |
+| `enabled` | `False` | Caller-side preference; rendering functions do not check this flag |
 | `width` | `600` | Output pixel width |
 | `height` | `300` | Output pixel height |
 | `fps` | `50` | Target frame rate |
@@ -39,7 +38,7 @@ config = RenderConfig(
 | `camera_padding` | `0.3` | World units of padding around robot |
 | `viewport_width` | `4.0` | World units visible horizontally |
 | `camera_mode` | `"fit_robot"` | Camera tracking mode |
-| `camera_smoothing` | `0.18` | Camera lerp factor (0=instant, 1=static) |
+| `camera_smoothing` | `0.18` | Camera lerp factor (0=static after initial placement, 1=instant) |
 | `supersample` | `2` | Supersampling factor for antialiasing |
 | `output_dir` | `"renders"` | Directory for saved GIFs |
 | `target_frames` | `None` | Optional frame budget cap |
@@ -70,7 +69,7 @@ obs, init_state = env.reset()
 
 # 2. Run render pass (captures positions + spring state)
 render_step = make_render_episode_step(env)
-actions = jnp.ones((500, env.n_actuators))
+actions = jnp.ones((500, env.n_actuators))  # neutral targets, not a walking policy
 final_state, outputs = jax.lax.scan(render_step, init_state, actions)
 
 # 3. Render and save
@@ -87,7 +86,7 @@ save_gif(frames, "walker.gif", config)
 render_step = make_render_episode_step(env)
 ```
 
-Returns a `lax.scan`-compatible step function that captures `RenderStepOutput` (positions, spring rest lengths, reward, done) at each step. Works with any `EvoGymBaseEnv` subclass.
+Returns a `lax.scan`-compatible step function that captures `RenderStepOutput` (positions, spring rest lengths, reward, done) at each step. Works with built-in environments using the standard state fields. It records `done` but does not freeze finished states; use the helper in [First Simulation](../../getting-started/first-simulation/) when that behavior is required.
 
 ### render_episode
 

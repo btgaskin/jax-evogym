@@ -172,16 +172,22 @@ To create a fresh document with a specific size, click **New** in the top bar an
 
 ## Metadata
 
-The Metadata panel defines optional world markers and preview settings.
+The Metadata panel holds optional **design annotations** and preview settings. Markers record your intent; they do not configure a simulation.
 
-- **Spawn** is the robot's starting grid point.
-- **Target** is the goal grid point used by tasks that need a destination.
-- **Direction** is the initial heading: north, east, south, or west.
+- **Spawn** marks a proposed starting grid cell. It does not reposition the robot.
+- **Target** marks a proposed goal grid cell. It does not define a reward or a success condition.
+- **Direction** draws an intended heading at the spawn marker: north, east, south, or west. It does not rotate the robot.
 - **Mirror Preview** draws reflected spawn, target, and direction markers across the grid's vertical axis. It does not change the objects or exported marker coordinates.
 
 Click **Place on canvas**, then click a grid cell to set a spawn or target marker. In **Move** mode, you can drag an existing marker to another grid cell. The X and Y fields also accept exact coordinates.
 
 ---
+
+Designer JSON preserves these annotations in `metadata`. The Python loader
+`EvoWorld.from_json` ignores them, and `EvoWorld.to_json` omits them when saving.
+Object positions in the canonical JSON determine placement when compiling a
+world; built-in environments define their own spawn positions and task rules.
+Keep the original designer export if you want to retain your annotations.
 
 ## Import and export
 
@@ -252,6 +258,8 @@ still experimental; stable worlds should use square-cell terrain.
 
 ## Keyboard shortcuts
 
+Use `Cmd` in place of `Ctrl` on macOS. Canvas arrow keys move the keyboard cursor when the canvas has focus; otherwise they move the selected object.
+
 | Action | Shortcut |
 |--------|----------|
 | Select group | `Q` / `W` (also `1` / `2`) |
@@ -259,11 +267,11 @@ still experimental; stable worlds should use square-cell terrain.
 | Cycle type in group | `S` |
 | Move selected object | `Arrow keys` |
 | Place voxel | `Space` / Click |
-| Paint stroke | `Space` + Drag |
+| Paint stroke | Draw + drag (or `Space` + drag) |
 | Erase voxel | `X` / Right-click |
 | Rectangle fill | `Shift` + Drag |
-| Pan viewport | Drag outside grid / Middle-drag |
-| Zoom | Scroll |
+| Pan viewport | Move + drag empty space / Middle-drag / Two-finger drag |
+| Zoom | Scroll / Pinch / Zoom buttons |
 | Rotate object | `R` |
 | Mirror object | `Ctrl+M` |
 | Duplicate object | `Ctrl+D` |
@@ -271,3 +279,7 @@ still experimental; stable worlds should use square-cell terrain.
 | Undo | `Ctrl+Z` |
 | Redo | `Ctrl+Shift+Z` or `Ctrl+Y` |
 | Show shortcuts | `?` |
+
+## Run your design
+
+Continue to [Designer to Simulation](../../guides/designer-world/) to load the exported world in Python and run a controller. The designer edits geometry and annotations; simulation and task evaluation run in Python.

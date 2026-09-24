@@ -161,7 +161,7 @@ export default function MetadataPanel({ markerPlacementMode, setMarkerPlacementM
 			{collapsed ? null : (
 			<>
 			<p className="mt-2 text-xs text-muted text-pretty">
-				Optional. Place spawn and target markers, set a primary heading, and preview mirrored points.
+				Design annotations only. Mark a proposed spawn, target, or direction. These markers do not move objects or configure Python simulations.
 			</p>
 
 			<div className="mt-3 grid gap-2">

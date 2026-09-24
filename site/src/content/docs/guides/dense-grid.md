@@ -3,6 +3,8 @@ title: Dense Grid Pipeline
 description: Pure JAX, vmap-able morphology construction for evolutionary search over robot populations.
 ---
 
+This is an advanced construction guide. First use [Variable Morphology](../variable-morphology/) to decide whether you need fixed-shape JAX construction. Standard environments and named designer worlds use the object-separated builder.
+
 The dense grid pipeline builds simulation data with JAX after a one-time NumPy setup. Its build functions support `jax.jit` and `jax.vmap`, allowing batches of different morphologies to share a fixed grid layout. Batch capacity depends on grid size, collision buffers, and available device memory.
 
 This is the recommended path for **morphology search**: neuroevolution, QD algorithms, or any regime where the robot body is a search variable alongside or instead of the controller.
@@ -73,7 +75,7 @@ Builds `ActuatorInfo`, which maps each actuator cell to the pair of springs it c
 - `V_ACT` cells control their left and right vertical springs.
 - `CONTRACTILE` cells are **not** handled here — use `jax_build_per_axis_actuator_info` instead.
 
-The returned arrays are padded to `(H*W, 2)`. Non-actuator rows hold spring index `0` and contribute zero action via scatter-add (safe, not a bug). Use `actuator_mask` `(H*W,)` bool to identify active actuator slots.
+The returned arrays are padded to `(H*W, 2)`. Non-actuator rows hold repeated dummy spring indices. `set_actuator_goals` ignores those rows, so padded action values do not change passive spring targets. Use `actuator_mask` `(H*W,)` bool to identify active actuator slots. Unlike the compact action vector in built-in environments, this path takes one action entry per grid cell.
 
 ## jax_build_per_axis_actuator_info
 
@@ -156,7 +158,7 @@ The dense grid pipeline has deliberate restrictions that make vmapping tractable
 | vmap over morphologies | Yes | No |
 | JIT-able | Yes | No (uses NumPy during compilation) |
 
-If your environment includes walls or multiple independent terrain objects, use `compile_world_template` / `instantiate_world` instead. See [Variable Morphology](../../guides/variable-morphology/) for a comparison.
+Fixed walls can be encoded in the composited grid. If you need independently owned terrain objects, use `compile_world_template` / `instantiate_world` instead. See [Variable Morphology](../../guides/variable-morphology/) for a comparison.
 
 Flat `FIXED` terrain is supported in both paths. Slope friction/support is not
 part of either stable path.

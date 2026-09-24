@@ -142,7 +142,7 @@ If you change JAX versions, rerun the parity suite in [`tests`](tests) before tr
 
 ## Acknowledgements
 
-`jax-evogym` is a JAX-native reimplementation of [Evolution Gym](https://github.com/EvolutionGym/evogym) (EvoGym), the soft-body robot benchmark by Jagdeep Bhatia, Holly Jackson, Yunsheng Tian, Jie Xu, and Wojciech Matusik (NeurIPS 2021). Evolution Gym is distributed under the MIT License (Copyright © 2022 jagdeepsb). The physics model and the reference traces used for [parity validation](#parity-validation) are derived from it. See [`NOTICE`](NOTICE) for the full attribution and license text.
+`jax-evogym` is a JAX-native reimplementation of [Evolution Gym](https://github.com/EvolutionGym/evogym) (EvoGym), the soft-body robot benchmark by Jagdeep Bhatia, Holly Jackson, Yunsheng Tian, Jie Xu, and Wojciech Matusik (NeurIPS 2021). Evolution Gym is distributed under the MIT License (Copyright © 2022 jagdeepsb). The physics model and the reference traces used for [parity validation](https://jax-evogym.pages.dev/core/parity/) are derived from it. See [`NOTICE`](NOTICE) for the full attribution and license text.
 
 If you build on this work, please also cite the original benchmark:
 
@@ -153,3 +153,7 @@ If you build on this work, please also cite the original benchmark:
 `jax-evogym` is licensed under [Apache-2.0](LICENSE). EvoGym-derived material,
 including reference traces and physics parameterization, is attributed under
 the MIT License in [NOTICE](NOTICE).
+
+### Runnable examples
+
+Start with [First Simulation](https://jax-evogym.pages.dev/getting-started/first-simulation/) or the [source examples](examples/README.md). Guides cover [designer exports](https://jax-evogym.pages.dev/guides/designer-world/), [controllers](https://jax-evogym.pages.dev/guides/controllers/), and [evolutionary search](https://jax-evogym.pages.dev/guides/evolutionary-search/).

@@ -3,6 +3,8 @@ title: Custom Environments
 description: Build your own environments using the base class and observation helpers.
 ---
 
+Use this guide when the [built-in environments](../environments/) do not express your task. It assumes you understand the [controller and action interface](../controllers/). Start by changing one reward before defining a new state or physics workflow.
+
 ## The base class
 
 All built-in environments extend `EvoGymBaseEnv`, which handles the full build pipeline:
@@ -45,110 +47,60 @@ After construction, the base class exposes:
 | `n_points` | Total dynamic point count |
 | `render_info` | `RenderInfo` — static rendering metadata |
 
-## Environment pattern
+## Start by changing one part of an existing task
 
-Every environment follows the same structure:
-
-1. Call `super().__init__()` with terrain JSON and spawn position
-2. Compute `obs_dim` from observation components
-3. Build the initial env state in `__init__`
-4. Implement `reset()` returning `(obs, init_state)`
-5. Implement `step(state, action)` with `@jax.jit`
+If you only need a different reward, subclass an existing environment. Keep
+its observations, state, and physics so the change is easy to inspect.
+The runnable implementation is
+[`examples/custom_environment.py`](https://github.com/btgaskin/jax-evogym/blob/main/examples/custom_environment.py).
 
 ```python
-from functools import partial
 import jax
 import jax.numpy as jnp
-import numpy as np
+from jax_evogym import WalkerV0
 
-from jax_evogym.types import EnvState, StepOutput
-from jax_evogym.collision import is_self_colliding
-from jax_evogym.sim import env_step
-from jax_evogym.environments._base import EvoGymBaseEnv
-from jax_evogym.environments._obs import (
-    get_vel_com_obs, get_relative_pos_obs, get_deformation_obs,
-)
+@jax.jit
+def penalize_effort(reward, action, already_done, coefficient):
+    clipped = jnp.clip(action, 0.6, 1.6)
+    effort = jnp.sum(jnp.square(clipped - 1.0))
+    return jnp.where(already_done, 0.0, reward - coefficient * effort)
 
+class EffortWalker(WalkerV0):
+    def __init__(self, body, effort_coefficient=0.001, **kwargs):
+        if effort_coefficient < 0:
+            raise ValueError("effort_coefficient must be non-negative")
+        super().__init__(body, **kwargs)
+        self.effort_coefficient = effort_coefficient
 
-class MyEnvV0(EvoGymBaseEnv):
-    def __init__(self, body, connections=None, max_steps=500, include_deformation=True):
-        super().__init__(
-            "Walker-v0.json",  # terrain JSON
-            body,
-            spawn_x=1, spawn_y=1,
-            connections=connections,
-            max_steps=max_steps,
-        )
-        self.include_deformation = include_deformation
-        self.obs_dim = 2 + 2 * self.n_robot_points
-        if include_deformation:
-            self.obs_dim += 2 * self.n_robot_voxels
-
-        init_com_x = self._compute_com_x(self._init_sim_state)
-        self._init_env_state = EnvState(
-            sim_state=self._init_sim_state,
-            step_count=jnp.array(0, dtype=jnp.int32),
-            done=jnp.array(False),
-            prev_com_x=init_com_x,
-        )
-
-    def reset(self):
-        obs = self._compute_obs(self._init_sim_state)
-        return obs, self._init_env_state
-
-    @partial(jax.jit, static_argnums=(0,))
-    def step(self, env_state, action):
-        sim_state = env_state.sim_state
-
-        # Action clipping
-        action = jnp.clip(action, 0.6, 1.6)
-        action = jnp.where(jnp.abs(action) < 1e-8, 0.0, action)
-
-        # Physics step
-        new_sim_state = env_step(
-            sim_state, self.topology, self.constants,
-            action, self.actuator_info,
-            collision_data=self.collision_data,
-            static_collider_data=self.static_collider_data,
-        )
-
-        # Reward and done (customize these)
-        new_com_x = self._compute_com_x(new_sim_state)
-        reward = new_com_x - env_state.prev_com_x
-
-        new_step_count = env_state.step_count + 1
-        self_colliding = is_self_colliding(
-            new_sim_state.positions, self.collision_data
-        )
-        done = self_colliding | (new_step_count >= self.max_steps)
-        reward = jnp.where(self_colliding, reward - 3.0, reward)
-        reward = jnp.where(env_state.done, 0.0, reward)
-        done = env_state.done | done
-
-        obs = self._compute_obs(new_sim_state)
-        new_env_state = EnvState(
-            sim_state=new_sim_state,
-            step_count=new_step_count,
-            done=done,
-            prev_com_x=new_com_x,
-        )
-        return obs, new_env_state, reward, done
-
-    def _compute_com_x(self, sim_state):
-        return jnp.mean(sim_state.positions[self.robot_point_indices][:, 0])
-
-    def _compute_obs(self, sim_state):
-        parts = [
-            get_vel_com_obs(sim_state.velocities_true, self.robot_point_indices),
-            get_relative_pos_obs(sim_state.positions, self.robot_point_indices),
-        ]
-        if self.include_deformation:
-            parts.append(get_deformation_obs(
-                sim_state.positions, self.topology,
-                sim_state.spring_init_rest_length, self.deformation_info,
-            ))
-        return jnp.concatenate(parts)
+    def step(self, state, action):
+        obs, next_state, reward, done = super().step(state, action)
+        reward = penalize_effort(reward, action, state.done, self.effort_coefficient)
+        return obs, next_state, reward, done
 ```
+
+The coefficient is a task-design choice, not a simulator default. The terminal
+transition still receives a reward; calls after termination receive zero.
+
+JIT helpers take runtime arrays as arguments. Avoid making the environment
+instance a static JIT argument: it holds substantial array data and changing
+its attributes can interact poorly with compilation caches. Keep only actual
+compile-time choices, such as observation structure, static.
+
+## A new task or custom world
+
+For a different state or observation contract:
+
+1. Build the world once outside the rollout.
+2. Define a JAX pytree holding simulation state and reward/termination bookkeeping.
+3. Implement `reset()` returning `(obs, state)`.
+4. Pass state, actions, and simulation arrays into a module-level JIT step helper.
+5. Return `(obs, next_state, reward, done)` and specify what happens after `done`.
+
+`EvoGymBaseEnv` loads terrain through the package's `data_path(json_name)`.
+For an exported designer world, use the explicit builder workflow in
+[Your designed world](../designer-world/) instead of copying a JSON file into
+the installed package. The low-level builder supplies physics; your task still
+needs to define observations, reward, and termination.
 
 ## Available observation helpers
 
@@ -176,7 +128,10 @@ See [Observation Helpers](../../reference/observation-helpers/) for full signatu
 To create custom terrain, use the [Designer](../../designer/) to build and export EvoGym JSON, or construct an `EvoWorld` programmatically:
 
 ```python
-from jax_evogym import EvoWorld, FIXED
+import numpy as np
+from jax_evogym import EvoWorld, FIXED, H_ACT, V_ACT
+
+body = np.array([[H_ACT, V_ACT]])
 
 world = EvoWorld()
 world.add_from_array("ground", np.array([[FIXED, FIXED, FIXED, FIXED]]), 0, 0)
@@ -188,6 +143,8 @@ world.add_from_array("robot", body, 1, 2)
 Create a `lax.scan`-compatible function for your environment:
 
 ```python
+from jax_evogym import StepOutput
+
 def make_my_episode_step(env):
     def episode_step(env_state, action):
         obs, new_env_state, reward, done = env.step(env_state, action)

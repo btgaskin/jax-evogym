@@ -33,7 +33,7 @@ SIM_TIME_PER_STEP = C.PHYSICS_UPDATES_PER_STEP * C.DT  # 0.003
 
 @dataclass
 class RenderConfig:
-    enabled: bool = False
+    enabled: bool = False    # Caller preference; direct render functions always render.
     width: int = 600
     height: int = 300
     fps: int = 50
@@ -45,7 +45,7 @@ class RenderConfig:
     camera_padding: float = 0.3   # world units around robot COM
     viewport_width: float = 4.0   # world units visible
     camera_mode: str = "fit_robot"
-    camera_smoothing: float = 0.18
+    camera_smoothing: float = 0.18  # Fraction toward target: 0=hold, 1=instant.
     supersample: int = 2
     grid_major_every: int = 5
     show_minor_grid: bool = False

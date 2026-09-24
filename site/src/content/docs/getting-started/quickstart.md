@@ -1,7 +1,9 @@
 ---
 title: Quick Start
-description: Three progressive examples to get running with jax-evogym.
+description: A short introduction to world construction, environment stepping, and the builder API.
 ---
+
+After [installation](../installation/), use these three small examples to understand the Python API. Each code block is self-contained. For the relationship between worlds, state, and environments, read [Concepts](../concepts/).
 
 ## Create a world
 
@@ -55,7 +57,10 @@ The builder API gives you direct access to `SimState`, `CollisionData`, `Actuato
 
 ## Where to go next
 
-- [Concepts](../../getting-started/concepts/) — how the pieces fit together
-- [Environments](../../guides/environments/) — all 7 built-in environments
-- [Rendering](../../guides/rendering/) — generate GIFs from rollouts
-- [Voxel Types](../../reference/voxel-types/) — the full cell type reference
+Continue to [First Simulation](../first-simulation/) to run a multi-step simulation and inspect an animation. Then choose a task:
+
+- [Designer to Simulation](../../guides/designer-world/) — load an exported world.
+- [Environments](../../guides/environments/) — choose a built-in task.
+- [Controllers and Actions](../../guides/controllers/) — supply a policy and handle episode completion.
+
+Keep [Voxel Types](../../reference/voxel-types/) nearby as a reference. The [research example](../../research/) shows how these pieces support a larger experiment.

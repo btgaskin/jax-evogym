@@ -343,3 +343,39 @@ class TestSetPerAxisGoals:
             jnp.array([0.8, 1.1], dtype=jnp.float32),
         )
         assert out.spring_rest_length_goal.shape == state.spring_rest_length_goal.shape
+
+
+def test_dense_per_axis_ignores_inactive_cell_axes():
+    """Inactive axes use dummy pairs and must not scatter into spring zero."""
+    from jax_evogym import EvoWorld, H_ACT, V_ACT, SOFT, CONTRACTILE, compile_world_template, instantiate_world
+
+    world = EvoWorld()
+    world.add_from_array('robot', np.array([[SOFT, H_ACT, V_ACT, CONTRACTILE]]), 0, 1)
+    built = instantiate_world(compile_world_template(world, robot_name='robot'))
+    info = built.per_axis_info
+    h = jnp.array([1.1, 1.2, 1.3, 1.4])
+    v = jnp.array([0.9, 0.8, 0.7, 0.6])
+    compact = set_per_axis_goals_compact(
+        built.sim_state, info, h[info.h_compact_cell_indices], v[info.v_compact_cell_indices],
+    )
+    for setter in (set_per_axis_goals, jax.jit(set_per_axis_goals)):
+        dense = setter(built.sim_state, info, h, v)
+        np.testing.assert_allclose(dense.spring_rest_length_goal, compact.spring_rest_length_goal, atol=1e-7)
+        inactive = ~np.asarray(info.actuated_spring_mask)
+        np.testing.assert_array_equal(dense.spring_rest_length_goal[inactive], built.sim_state.spring_rest_length_goal[inactive])
+
+
+def test_dense_scalar_padding_does_not_actuate_passive_springs():
+    from jax_evogym import SOFT, H_ACT, V_ACT, precompute_grid, jax_build_sim_state, jax_build_actuator_info
+
+    body = jnp.array([[SOFT, H_ACT, V_ACT]], dtype=jnp.int32)
+    grid = precompute_grid(H=1, W=3)
+    state, _ = jax_build_sim_state(body, grid)
+    info, mask = jax_build_actuator_info(body, grid)
+    actions = jnp.array([1.6, 1.2, 0.8])
+    expected = set_actuator_goals(state, info, jnp.where(mask, actions, 0.))
+    for setter in (set_actuator_goals, jax.jit(set_actuator_goals)):
+        actual = setter(state, info, actions)
+        np.testing.assert_allclose(actual.spring_rest_length_goal, expected.spring_rest_length_goal, atol=1e-7)
+        inactive = ~np.asarray(info.actuated_spring_mask)
+        np.testing.assert_array_equal(actual.spring_rest_length_goal[inactive], state.spring_rest_length_goal[inactive])

@@ -13,7 +13,7 @@ Simulation and environment state types are `NamedTuple` subclasses, which gives 
 
 ### `SimState`
 
-The core mutable state passed through every simulation step. Vmapped across population during training.
+The evolving state passed through every simulation step. Each step returns a new state; the NamedTuple is immutable. Vmapped across population during training.
 
 | Field | Shape | dtype | Description |
 |---|---|---|---|
@@ -286,7 +286,7 @@ Used by the climb environment. Rewards upward movement only.
 
 ### `GridData`
 
-The raw grid-aligned spring-mass layout for a single object before it is merged into a world. Produced by the object builder.
+The reusable lattice and connectivity data produced by `precompute_grid(H, W)` for the dense-grid pipeline. It describes grid structure independently of the morphology occupying it.
 
 | Field | Shape | dtype | Description |
 |---|---|---|---|
@@ -374,7 +374,7 @@ A `@dataclass` (not a `NamedTuple`) controlling the renderer. All fields have de
 
 | Field | Default | Description |
 |---|---|---|
-| `enabled` | `False` | Whether to render at all |
+| `enabled` | `False` | Caller-side preference; does not disable direct rendering calls |
 | `width` | `600` | Output frame width in pixels |
 | `height` | `300` | Output frame height in pixels |
 | `fps` | `50` | Target playback frame rate |
@@ -386,7 +386,7 @@ A `@dataclass` (not a `NamedTuple`) controlling the renderer. All fields have de
 | `camera_padding` | `0.3` | World units of padding around the robot |
 | `viewport_width` | `4.0` | World-space units visible horizontally |
 | `camera_mode` | `"fit_robot"` | Fit the viewport to the robot; any other value uses a fixed viewport width |
-| `camera_smoothing` | `0.18` | Camera interpolation factor (`0` is instant, `1` is static) |
+| `camera_smoothing` | `0.18` | Camera interpolation factor (`0` retains the previous centre, `1` tracks instantly) |
 | `supersample` | `2` | Anti-aliasing multiplier (render at N× then downscale) |
 | `grid_major_every` | `5` | Draw a heavier grid line every N cells |
 | `show_minor_grid` | `False` | Draw minor grid lines |
