@@ -1,0 +1,23 @@
+/* The English homepage keeps its first rendered font for the whole visit.
+   Preload Geist, but retain the fallback on slow connections instead of
+   reflowing the vertically centred hero after its first paint. */
+@font-face {
+	font-family: 'Geist Home';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: optional;
+	src: url('@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Geist Mono Home';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: optional;
+	src: url('@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2') format('woff2');
+}
+
+.home-fonts {
+	--font-sans: 'Geist Home', 'Segoe UI', sans-serif;
+	--font-mono: 'Geist Mono Home', 'SFMono-Regular', 'JetBrains Mono', monospace;
+}

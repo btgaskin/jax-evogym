@@ -1,5 +1,8 @@
 ---
 import '../styles/site.css';
+import '../styles/home-fonts.css';
+import homeFont from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import homeMonoFont from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
 import ThemeBoot from '../components/theme/ThemeBoot.astro';
 import ThemeSelectInline from '../components/theme/ThemeSelectInline.astro';
 
@@ -13,10 +16,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="description" content="A JAX-native EvoGym simulator with JIT-compiled, vmap-batched soft-body rollouts and parity validated against original-simulator reference traces on the documented task set." />
 		<link rel="icon" href={`${base}/favicon.svg`} />
+		<link rel="preload" href={homeFont} as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href={homeMonoFont} as="font" type="font/woff2" crossorigin />
 		<title>JAX EvoGym</title>
 		<ThemeBoot />
 	</head>
-	<body class="bg-app font-sans text-ink antialiased">
+	<body class="home-fonts bg-app font-sans text-ink antialiased">
 		<div class="min-h-[100dvh]">
 			<header class="sticky top-0 z-30 border-b border-border/80 bg-panel/95 backdrop-blur-sm">
 				<div class="mx-auto flex max-w-[1180px] items-center justify-between gap-4 px-4 py-3 md:px-6">
